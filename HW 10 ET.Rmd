@@ -1,0 +1,119 @@
+---
+title: "Homework 10"
+author: "Sebastian Alzate Vargas"
+date: "04/15/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Problem
+
+A continuación se muestra una muestra de una distribución normal con media 0 y varianza $\theta$. Encuentre un límite superior del $90\%$ (que es un intervalo de la forma $[0, T)$, para $\theta$ derivando la prueba de razón de verosimilitud correspondiente. Tenga en cuenta que 20 NO es una muestra grande.
+
+```{r}
+x<-c(-12.17,-11.56,-11.44,-9.11,-8.10,-6.93,-1.74,-1.71,-0.40,0.56,
+     1.94,3.12,3.72,7.05,7.98,9.40,9.46,11.07,13.83,19.14)
+```
+
+
+## Solucion
+
+Queremos testear: $$H_0: \theta=\theta_0 \ \ \text{VS} \ \ H_a: \theta<\theta_0$$
+Sea $X_1, X_2, ... ,X_n \sim N\left(0,\sqrt{\theta}\right)$, entonces 
+
+\begin{align*}
+\frac{X_1}{\sqrt{\theta}}, \frac{X_2}{\sqrt{\theta}}, ... , \frac{X_n}{\sqrt{\theta}} &\sim N\left(0,1\right)\\
+\frac{X_1^2}{\theta}, \frac{X_2^2}{\theta}, ... , \frac{X_n^2}{\theta} &\sim \chi^2_{(1)}\\
+\dfrac{\sum X_i^2}{\theta} &\sim \chi^2_{(n)}
+\end{align*}
+
+La función likelihood esta dada por: 
+
+\begin{align*}
+    f(\pmb{x}\vert \theta)&=\prod_{i=1}^n\dfrac{1}{\sqrt{2\pi\theta}}\exp\left\{-\dfrac{x_i^2}{2\theta}\right\}=(2\pi\theta)^{-n/2}\exp\left\{-\dfrac{\sum x_i^2}{2\theta}\right\}
+\end{align*}
+
+Así,
+
+\begin{align*}
+    l(\theta)=-\dfrac{n}{2}\log (2\pi)-\dfrac{n}{2}\log(\theta)-\dfrac{1}{2}\frac{\sum x_i^2}{\theta}
+\end{align*}
+
+Derivando con respecto a $\theta$ e igualando a cero, obtenemos:
+
+\begin{align*}
+    0=\dfrac{d l(\theta)}{d\theta}=-\dfrac{n}{2\theta}+\dfrac{\sum x_i^2}{2\theta^2}=\dfrac{-n\theta+\sum x_i^2}{2\theta^2}
+\end{align*}
+
+finalmente, el mle de $\theta$ es  $$\hat\theta=\dfrac{\sum x_i^2}{n}$$
+
+Reemplazando nuestros datos:
+
+```{R}
+n<-length(x)
+thetahat<-sum(x^2)/n
+cat('mle de theta es:',thetahat)
+```
+Usando Likelihood Ratio Tests, tenemos que $$\lambda(\pmb{x})=\frac{\sup_{\Theta_0}L(\theta | \pmb{x})}{\sup L(\theta | \pmb{x})}$$
+
+Donde $\Theta_0=\{\theta_0\}$ entonces el numerador de $\lambda(\pmb{x})$ es $L(\theta_0| \pmb{x})$
+
+Así, 
+
+\begin{align*}
+    \lambda(\pmb{x})&=\dfrac{(2\pi\theta_0)^{-n/2}\exp\left\{-\dfrac{\sum x_i^2}{2\theta_0}\right\}}{\left(2\pi\dfrac{\sum x_i^2}{n}\right)^{-n/2}\exp\left\{-\dfrac{\sum x_i^2}{2\dfrac{\sum x_i^2}{n}}\right\}}=\left(\dfrac{\sum x_i^2}{n\theta_0}\right)^{n/2}\cdot\exp\left\{\dfrac{n}{2}-\dfrac{\sum x_i^2}{2\theta_0}\right\}
+\end{align*}
+
+Entonces, $-2\log\lambda(\pmb{x})$ esta dado por 
+
+\begin{align*}
+    -2\log\lambda(\pmb{x})&=-2\left[\dfrac{n}{2}\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)+\dfrac{n}{2}-\dfrac{\sum x_i^2}{2\theta_0} \right]=n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right]
+\end{align*}
+
+Rechazamos $H_0$ si LRT es small lo que es equivalente que $-2\log\lambda(\pmb{x})$ es large
+
+Definamos: $h(\theta)=-n\log\left(\dfrac{\theta}{\theta_0} \right)+n\left(\dfrac{\theta}{\theta_0}-1 \right)$. Derivando 
+
+\begin{align*}
+    \dfrac{d h(\theta)}{d \theta}&=-\dfrac{n/\theta_0}{\theta/\theta_0}+\dfrac{n}{\theta_0}\\
+    &=-\dfrac{n}{\theta}+\dfrac{n}{\theta_0}>0
+\end{align*}
+
+Cuando, $\theta>\theta_0$. 
+
+Así, $h(\theta)$ es decreciente en $(0,\theta_0)$ y $h(\theta)$ es creciente en $(\theta_0,\infty)$. Por tanto, $h(\theta)$ es large cuando $\theta<cv2$ o cuando $\theta>cv1$
+
+Pero en nuestro caso, rechazamos $H_0$ si $\theta<cv1$ lo que es equivalente a $\hat\theta<cv1$
+
+\begin{align*}
+    \alpha&=P(\text{Rechazar } H_0\vert H_0 \text{ Verdadera}) \\
+    \alpha&= P(\hat\theta < cv1 \vert \theta_0) \\
+    \alpha&=  P\left(\frac{\sum X_i^2}{n} < cv1 \vert \theta_0\right) \\
+    \alpha&= P\left(\frac{\sum X_i^2}{\theta_0} < \frac{n\cdot cv1}{\theta_0}\right)
+\end{align*}
+
+Sabemos que 
+\begin{align*}
+\dfrac{\sum X_i^2}{\theta} &\sim \chi^2_{(n)}
+\end{align*}
+
+Entonces 
+
+\begin{align*}
+ \alpha=pchisq\left(\frac{n\cdot cv1}{\theta_0},n\right)
+\end{align*}
+
+asi, $\frac{n\cdot cv1}{\theta_0}=qchisq(\alpha,n)$. Por tanto,
+\begin{align*}
+ \alpha&= P\left(\frac{\sum X_i^2}{\theta_0} < qchisq(\alpha,n)\right)\\
+ 1-\alpha&= P\left(\frac{\sum X_i^2}{\theta_0} \geq qchisq(\alpha,n)\right)\\
+ 1-\alpha&= P\left(\theta_0 \leq \frac{\sum X_i^2}{qchisq(\alpha,n)} \right)
+\end{align*}
+
+Asi, un limite superior del $90\%$ para $\theta$ es
+```{r}
+alpha<-0.1
+limi<-sum(x^2)/qchisq(alpha,n)
+cat('el limite superior es:',limi)
+```
+

@@ -1,0 +1,166 @@
+---
+title: "Tarea 6 ET"
+author: "Sebastian Alzate Vargas"
+date: "Marzo 04/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Digamos que tenemos lo siguiente: tenemos datos $X_1,..,X_n \sim N(0, 1)$ y $Y_1,..,Y_m \sim N(\mu, 1)$ Deseamos el test $$H_0:\mu=0\text{ vs. }H_a:\mu>0$$
+
+# Problema 1
+Verifique que esta prueba tenga el error tipo I correcto para el caso. $n=m=10, \alpha=0.01, 0.05, 0.10$
+
+## Solución 1
+Como queremos rechazar $H_0$ cuando es verdadera, entonces vamos a tomar $\mu=0$ y vamos hacer varias simulaciones.
+```{R}
+fun1<-function(mu,alp,simu){
+  A<-matrix(rnorm(simu*10,0,1),ncol = 10)
+  B<-matrix(rnorm(simu*10,mu,1),ncol = 10)
+  pval<-0 
+  cont<-0
+  for (i in 1:simu){
+    pval[i]<-t.test(A[i,], B[i,], alternative = "less", var.equal = TRUE)$p.value
+    
+    if (alp>pval[i]) {
+      cont=cont+1}
+  }
+  cont
+}
+
+fun1(0,0.01,1000)
+fun1(0,0.05,1000)
+fun1(0,0.10,1000)
+
+```
+Como los aciertos fueron pocos, podemos decir que tiene error tipo 1.
+
+# Problema 2
+Cuál es el poder de esta prueba si $n=m=10, \mu=1.1,\alpha=0.05$?
+
+## Solución 2
+```{R, }
+fun2<-function(mu,alp,simu){
+  A<-matrix(rnorm(simu*10,0,1),ncol = 10)
+  B<-matrix(rnorm(simu*10,mu,1),ncol = 10)
+  pval<-0
+  cont<-0
+  for (i in 1:simu) {
+    pval[i]<-t.test(A[i,], B[i,], alternative = "less",
+                    var.equal = TRUE)$p.value
+    if (alp<pval[i]) {
+      cont=cont+1}
+  }
+  1-(cont/simu)
+}
+
+fun2(1.1,0.05,1000)
+
+```
+Así es poder es de $0.7$
+
+# Problema 3
+Que tan grande es $\mu$ para que el poder sea $95 \%$ para el caso $n=m=10, \alpha=0.05$
+
+## Solución 3
+```{R }
+fun3<-function(mu,alp,simu){
+  z<-round(seq(0,mu,length=100*mu),2)
+  for (i in 1:length(z)) {
+    pow<-fun2(z[i],alp,simu)
+    if (round(pow,2)==0.95){
+      print(z[i])
+    }
+     
+  }
+}
+fun3(3,0.05,1000)
+
+```
+Y podemos verificar el poder con la función 2, con $\mu=1.5$
+```{R}
+fun2(1.55,0.05,1000)
+```
+Así tiene el poder deseado.
+
+# Problema 4
+Que tan grande es $\mu$ para que el poder sea $95 \%$ para el caso $n=m=10, \alpha=0.01$
+
+## Solución 4
+Usando la función 3, podemos obtener el resultado.
+```{R}
+fun3(3,0.01,1000)
+```
+Y podemos hallar su poder nuevamente con la función 2
+```{R, }
+fun2(1.95,0.01,1000)
+```
+Donde el poder dio lo deseado.
+
+# Problema 5
+Que tamaño de muestra $n = m$ es necesario para que la prueba tenga el poder de $95 \%$ si $\mu = 0,5$ y $\alpha = 0,05$?
+
+## Solución 5
+```{R}
+fun5<-function(mu,alp,simu,n){
+  pval<-0
+  cont<-0
+  tot<-0
+  s<-0
+  for (j in 2+2:n) {
+    A<-matrix(rnorm(simu*j,0,1),ncol = j)
+    B<-matrix(rnorm(simu*j,mu,1),ncol = j)
+    for (i in 1:simu) {
+      pval[i]<-t.test(A[i,], B[i,], alternative = "less",
+                      var.equal = TRUE)$p.value
+      if (alp<pval[i]) {
+        cont=cont+1}
+    }
+   tot[j]<- 1-cont/simu
+   if (round(tot[j],2)==0.95){
+     s<-c(s,j,tot[j])
+   }
+   cont<-0
+  }
+  s[-1]
+}
+fun5(0.5,0.05,1000,100)
+
+```
+Por tanto $n=m=88$
+
+# Problema 6
+Si $n = 10$, hay un metro para que la prueba tenga un poder de $95 %$ si $\mu = 0,5$ y $\alpha = 0,05$?
+
+## Solución 6
+```{R}
+fun6<-function(mu,alp,simu,n){
+  A<-matrix(rnorm(simu*10,0,1),ncol = 10)
+  pval<-0
+  cont<-0
+  tot<-0
+  s<-0
+  for (j in 2:n) {
+    B<-matrix(rnorm(simu*j,mu,1),ncol = j)
+    for (i in 1:simu) {
+      pval[i]<-t.test(A[i,], B[i,], alternative = "less",
+                      var.equal = TRUE)$p.value
+      if (alp<pval[i]) {
+        cont=cont+1}
+    }
+    tot[j]<- 1-cont/simu
+    if (round(tot[j],2)==0.95){
+      s<-c(s,j)
+      print(j)
+    }
+    cont<-0
+  }
+  print(s[-1])
+}
+
+fun6(0.5,0.05,100,200)
+
+
+```
+Así no existe ese $m$ que cumpla esas condiciones.

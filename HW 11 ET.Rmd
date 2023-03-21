@@ -1,0 +1,140 @@
+---
+title: "Homework 11"
+author: "Sebastian Alzate Vargas"
+date: "04/22/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Problem
+A continuación se muestran los datos de una distribución de Poisson truncada en 0, es decir, todas las observaciones que eran iguales a 0 se perdieron:
+```{r}
+data.frame('X'=1:7,'Frec'=c(24,34,16,4,3,2,1))
+```
+Encuentre un intervalo de confianza del $90\%$ para la tasa de Poisson $\lambda$. Dé un argumento de por qué su solución funciona.
+
+## Solution
+
+```{r}
+x<-rep(1:7,c(24,34,16,4,3,2,1))
+```
+
+Sea $X_1, ..., X_n \sim Poisson(\lambda)$.
+
+La funcion truncada se define como: 
+\begin{align*}
+    P(X=x | X>0) &= \frac{f(x,\lambda)}{1-f(0,\lambda)}= \frac{\lambda^xe^{-\lambda}}{x!(1-e^{\lambda})}
+\end{align*}
+
+la función likelihood esta dada por:
+
+\begin{align*}
+    f(x|\lambda) &= \prod_{i=1}^n \frac{\lambda^{x_i}}{(e^{\lambda}-1)x_i!} = \frac{\lambda^{\sum x_i}}{(e^{\lambda}-1)^n \prod x_i!}
+\end{align*}
+
+Luego, $l(\lambda)$ esta dado por:
+
+\begin{align*}
+   l(\lambda) = \sum x_i\log(\lambda) - n\log(e^{\lambda}-1)-\sum\log(x_i!)
+\end{align*}
+
+Derivando la función $l(\lambda)$ con respecto a $\lambda$ e igualando a cero, obtenemos
+
+\begin{align*}
+\dfrac{ dl(\lambda)}{d\lambda} = \frac{\sum x_i}{\lambda} - \frac{ne^{\lambda}}{e^{\lambda}-1}=0
+\end{align*}
+Así, el mle esta dado por: $$\bar{x} = \frac{\hat{\lambda}}{1-e^{\hat{\lambda}}}$$
+
+```{r}
+cat('La media muestral es',mean(x))
+```
+Como no se puede resolver analiticamente. Hay que resolver la siguiente ecuacion analiticamente.
+$$2.261905 = \frac{\hat{\lambda}}{1-e^{\hat{\lambda}}}$$
+
+Una grafica para ese problema es:
+```{r}
+f<-function(l){
+  l/(1-exp(-l))
+}
+plot(f,xlim=c(0,4),ylim=c(1,4))
+abline(h=mean(x),col=2)
+```
+Como $\hat\lambda$ tiene que ser positivo. Vamos aproceder de la siguiente manera.
+
+```{r}
+seq<-1:20000/10000
+for (i in 1:length(seq)) {
+  if(seq[i]/(1-exp(-seq[i]))>=mean(x))break
+}
+mle<-seq[i]
+cat('El mle es:',mle)
+```
+Podemos verificarlo en la grafica
+
+```{r}
+plot(f,ylim=c(1,4),xlim=c(0,4))
+abline(h=mean(x),col=2);abline(v=mle,col=4)
+```
+
+Por otro lado queremos probar  $H_0: \lambda=\lambda_0$ vs $H_a: \lambda \neq \lambda_0$. Luego,
+
+Luego, $-2\log\lambda (x)$ esta dado por
+
+\begin{align*}
+    2\left( l( \hat \lambda) - l(\lambda_0 )\right) &=  2[ \sum x_i \log(\hat{\lambda}) - n \log\left( e^{\hat{\lambda}}-1\right)-\sum\log(x_i!) \\
+    &- \sum x_i \log({\lambda_0}) + n \log\left( e^{{\lambda_0}}-1\right)-\sum\log(x_i!) ] \\
+    &= 2\left[ \sum x_i \log(\hat{\lambda}) - n \log\left( e^{\hat{\lambda}}-1\right)- \sum x_i \log({\lambda_0}) + n \log\left( e^{{\lambda_0}}-1\right) \right] \\
+\end{align*}
+
+Rechazamos $H_0$ si 
+\begin{align*}
+    -2\left[ -\sum x_i \log(\hat{\lambda}) + n \log\left( e^{\hat{\lambda}}-1\right)+ \sum x_i \log({\lambda_0}) - n \log\left( e^{{\lambda_0}}-1\right) \right] &> qchisq(1-\alpha,1)\\
+    -\sum x_i \log(\hat{\lambda}) + n \log\left( e^{\hat{\lambda}}-1\right)+ \sum x_i \log({\lambda_0}) - n \log\left( e^{{\lambda_0}}-1\right) &<-qchisq(1-\alpha,1)/2
+\end{align*}
+
+La región de aceptación esta dada por: 
+
+$$A(\lambda)=\left\{ x:-\bar{x} \log(\hat{\lambda}) + \log\left( e^{\hat{\lambda}}-1\right)+ \bar{x} \log({\lambda_0}) - \log\left( e^{{\lambda_0}}-1\right) \geq cv\right\}$$
+
+donde $cv=-qchisq(1-\alpha,1)/2n$
+
+De la region de aceptacion podemos observar que:
+\begin{align*}
+   -\bar{x} \log(\hat{\lambda}) + \log\left( e^{\hat{\lambda}}-1\right)+ \bar{x} \log({\lambda_0}) - \log\left( e^{{\lambda_0}}-1\right) \geq cv \\
+   \bar{x}\log(\lambda_0) - \log(e^{{\lambda_0}}-1) \geq cv + \bar{x}\log(\hat{\lambda}) - \log\left( e^{\hat{\lambda}}-1\right)
+\end{align*}
+
+podemos resolver esta inecuacion para $\lambda_0$ numericamente.
+
+```{r}
+Interval<-function(x,alpha=0.1){
+  n<-length(x)
+  cv<-(-1)*qchisq(1-alpha, 1)/(2*n)
+  linf<-0
+  for (i in 1:100000) {
+    linf<-linf+0.0001
+    k<-mean(x)*log(linf)-log(exp(linf)-1)
+    if(k>=cv+mean(x)*log(mle)-log(exp(mle)-1))break
+    linf
+  }
+  lsup<-mle
+  for (i in 1:10000) {
+    lsup<-lsup+0.0001
+    k<-mean(x)*log(lsup)-log(exp(lsup)-1)
+    if(k<=cv+mean(x)*log(mle)-log(exp(mle)-1))break
+    lsup
+  }
+  cat("Elintervalo es:", linf,lsup)
+  LRT<- function(l) {
+    (mean(x)*log(l/mle)+log((exp(mle)-1)/(exp(l)-1)))
+  }
+  plot(LRT,xlim = c(linf-0.1,0.1+lsup),ylim=c(-0.02,0))
+  abline(h=cv, col=4);abline(v=linf, col=2);abline(v=lsup,col=2)
+}
+Interval(x)
+```
+
+El test funciona porque estamos considerando una nueva funcion de densidad conocida, la cual viene de una distribucion de densidad Poisson. Esa nueva funcion es una muestra grande, la derivada con respecto a $\lambda$ existe y no tiene valores parametricos desconocidos.
+
+A esa nueva funcion le hallamos el mle y le aplicamos toda la teoria sobre LRT

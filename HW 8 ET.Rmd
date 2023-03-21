@@ -1,0 +1,249 @@
+---
+title: "Homework 8"
+author: "Sebastian Alzate Vargas"
+date: "03/18/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+A continuación se muestran los datos de una distribución normal con media $0$ y varianza $\theta$.
+```{R, echo=FALSE}
+y <- c(-3.79, -2.32, -2.3, -2.1, -2.03, -1.37, -1.33, -1.04, -0.76, -0.75, -0.68, -0.68, -0.67, -0.64, -0.57, -0.52, -0.5, -0.47, -0.45, -0.44, -0.4, -0.39, -0.38, -0.26, -0.24, -0.24, -0.23, -0.15, -0.12, -0.09, -0.01, 0.01, 0.04, 0.05, 0.08, 0.16, 0.17, 0.27, 0.5, 0.66, 0.71, 0.77, 0.78, 0.87, 1.07, 1.31, 1.9, 2.52, 2.69, 2.94)
+y
+```
+Queremos probar
+$$H_0:\theta=\theta_0\text{ vs }H_a:\theta>\theta_0$$
+
+# Problema a
+Encuentre likelihood ratio test basada en la aproximación $\chi^2$  y aplicarlo a los datos con $\theta_0=1$ , $\alpha = 0,05$ encontrando el valor p.
+
+# Problema b
+Realice la misma prueba que en a, pero ahora sin la aproximación de muestra grande.
+
+# Problema c
+Dibuje la curva de potencia para esta prueba, con $n = 50$ , $\alpha = 0,05$.
+
+# Problema d
+Obtenga una prueba mejor sobre el mle y el teorema del límite central.
+
+# Problema e
+¿Qué prueba es más poderosa? Agregue la curva de potencia de esta prueba al gráfico en c.
+
+## Solucion a
+Sea $X_1, X_2, ... ,X_n \sim N\left(0,\sqrt{\theta}\right)$, entonces 
+
+\begin{align*}
+\frac{X_1}{\sqrt{\theta}}, \frac{X_2}{\sqrt{\theta}}, ... , \frac{X_n}{\sqrt{\theta}} &\sim N\left(0,1\right)\\
+\frac{X_1^2}{\theta}, \frac{X_2^2}{\theta}, ... , \frac{X_n^2}{\theta} &\sim \chi^2_{(1)}\\
+\dfrac{\sum X_i^2}{\theta} &\sim \chi^2_{(n)}
+\end{align*}
+
+La función likelihood esta dada por: 
+
+\begin{align*}
+    f(\pmb{x}\vert \theta)&=\prod_{i=1}^n\dfrac{1}{\sqrt{2\pi\theta}}\exp\left\{-\dfrac{x_i^2}{2\theta}\right\}=(2\pi\theta)^{-n/2}\exp\left\{-\dfrac{\sum x_i^2}{2\theta}\right\}
+\end{align*}
+
+Así,
+
+\begin{align*}
+    l(\theta)=-\dfrac{n}{2}\log (2\pi)-\dfrac{n}{2}\log(\theta)-\dfrac{1}{2}\frac{\sum x_i^2}{\theta}
+\end{align*}
+
+Derivando con respecto a $\theta$ e igualando a cero, obtenemos:
+
+\begin{align*}
+    0=\dfrac{d l(\theta)}{d\theta}=-\dfrac{n}{2\theta}+\dfrac{\sum x_i^2}{2\theta^2}=\dfrac{-n\theta+\sum x_i^2}{2\theta^2}
+\end{align*}
+
+finalmente, el mle de $\theta$ es  $$\hat\theta=\dfrac{\sum x_i^2}{n}$$
+
+Reemplazando nuestros datos:
+
+```{R}
+thetahat<-sum(y^2)/length(y)
+thetahat
+```
+Usando Likelihood Ratio Tests, tenemos que $$\lambda(\pmb{x})=\frac{\sup_{\Theta_0}L(\theta | \pmb{x})}{\sup L(\theta | \pmb{x})}$$
+
+Donde $\Theta_0=\{\theta_0\}$ entonces el numerador de $\lambda(\pmb{x})$ es $L(\theta_0| \pmb{x})$
+
+Así, 
+
+\begin{align*}
+    \lambda(\pmb{x})&=\dfrac{(2\pi\theta_0)^{-n/2}\exp\left\{-\dfrac{\sum x_i^2}{2\theta_0}\right\}}{\left(2\pi\dfrac{\sum x_i^2}{n}\right)^{-n/2}\exp\left\{-\dfrac{\sum x_i^2}{2\dfrac{\sum x_i^2}{n}}\right\}}=\left(\dfrac{\sum x_i^2}{n\theta_0}\right)^{n/2}\cdot\exp\left\{\dfrac{n}{2}-\dfrac{\sum x_i^2}{2\theta_0}\right\}
+\end{align*}
+
+Entonces, $-2\log\lambda(\pmb{x})$ esta dado por 
+
+\begin{align*}
+    -2\log\lambda(\pmb{x})&=-2\left[\dfrac{n}{2}\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)+\dfrac{n}{2}-\dfrac{\sum x_i^2}{2\theta_0} \right]=n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right]
+\end{align*}
+
+Usando la aproximación $\chi^2$. $H_0$ se rechaza si:
+
+\begin{align*}
+    n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right]&>qchisq(1-\alpha,1)\\
+     n\left[\dfrac{\theta}{\theta_0}-\log\left(\dfrac{\theta}{\theta_0} \right)-1 \right]&>qchisq(1-\alpha,1)
+\end{align*}
+
+Reemplazando $\alpha=0.05, \theta_0=1$
+
+```{R}
+n<-length(y)
+the0<-1
+alp<-0.05
+lam<-n*(thetahat/the0-log(thetahat/the0)-1)
+c(lam,qchisq(1-alp,1))
+```
+
+como $4.862404>3.841459$. Entonces $H_0$ se rechaza
+
+Hallemos el P-value:
+
+\begin{align*}
+    \text{P-value}&=P\left(Y>n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right]\right)\\
+    &=1-P\left(Y\leq n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right]\right)\\
+    &=1-pchisq\left(n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right],1\right)
+\end{align*}
+
+```{R}
+1-pchisq(lam,1)
+```
+
+## Solucion b
+Del ejercicio anterior tenemos que: 
+
+\begin{align*}
+    -2\log\lambda(\pmb{x})=n\left[\dfrac{\sum x_i^2}{n\theta_0}-\log\left(\dfrac{\sum x_i^2}{n\theta_0} \right)-1 \right]
+\end{align*}
+
+Rechazamos $H_0$ si LRT es small lo que es equivalente que $-2\log\lambda(\pmb{x})$ es large
+
+Definamos: $h(\theta)=-n\log\left(\dfrac{\theta}{\theta_0} \right)+n\left(\dfrac{\theta}{\theta_0}-1 \right)$. Derivando 
+
+\begin{align*}
+    \dfrac{d h(\theta)}{d \theta}&=-\dfrac{n/\theta_0}{\theta/\theta_0}+\dfrac{n}{\theta_0}\\
+    &=-\dfrac{n}{\theta}+\dfrac{n}{\theta_0}>0
+\end{align*}
+
+Cuando, $\theta>\theta_0$. 
+
+Así, $h(\theta)$ es decreciente en $(0,\theta_0)$ y $h(\theta)$ es creciente en $(\theta_0,\infty)$. Por tanto, $h(\theta)$ es large cuando $\theta<cv2$ o cuando $\theta>cv1$
+
+Pero en nuestro caso, rechazamos $H_0$ si $\theta>cv1$ lo que es equivalente a $\hat\theta>cv1$
+
+\begin{align*}
+    \alpha&=P(\text{Rechazar } H_0\vert H_0 \text{ Verdadera}) \\
+    \alpha&= P(\hat\theta > cv1 \vert \theta_0) \\
+    \alpha&=  P\left(\frac{\sum X_i^2}{n} > cv1 \vert \theta_0\right) \\
+    \alpha&= P\left(\frac{\sum X_i^2}{\theta_0} > \frac{n\cdot cv1}{\theta_0}\right) \\
+    \alpha&= 1-P\left(\frac{\sum X_i^2}{\theta_0} \leq \frac{n\cdot cv1}{\theta_0}\right)\\
+     1-\alpha&= P\left(\frac{\sum X_i^2}{\theta_0} \leq \frac{n\cdot cv1}{\theta_0}\right)
+\end{align*}
+
+Sabemos que 
+\begin{align*}
+\dfrac{\sum X_i^2}{\theta} &\sim \chi^2_{(n)}
+\end{align*}
+
+Entonces 
+
+$$\frac{n\cdot cv1}{\theta_0}= qchisq(1-\alpha,n)$$
+$$cv1 = \frac{\theta_0\cdot qchisq(1-\alpha,n)}{n}$$
+
+Entonces, la region de rechazo es $$\left\{\frac{\sum X_i^2}{n} > cv1\right\}$$
+$$\left\{\frac{\sum X_i^2}{n} > \frac{\theta_0\cdot qchisq(1-\alpha,n)}{n}\right\}$$
+$$\left\{\frac{\sum X_i^2}{\theta_0} > qchisq(1-\alpha,n)\right\}$$
+Reemplazando $\alpha=0.05, \theta_0=1$
+
+```{R}
+c(sum(y^2)/the0,qchisq(1-alp,n))
+```
+Como $75.40480>67.50481$ entonces $H_0$ se rechaza
+
+Hallemos el P-value:
+
+\begin{align*}
+    \text{P-value}&=P\left(Y>\frac{\sum x_i^2}{\theta_0}\right)\\
+    &=1-P\left(Y\leq\frac{\sum x_i^2}{\theta_0}\right)\\
+    &=1-pchisq\left(\frac{\sum x_i^2}{\theta_0},n\right)
+\end{align*}
+
+```{R}
+1-pchisq(sum(y^2)/the0,n)
+```
+
+
+
+## Solucion c
+\begin{align*}
+    power1 &= 1 - P\left( \text{Aceptar} H_0 \vert H_a \text{Verdadera} \right) \\
+    &= 1 - P\left( \frac{\sum X_i^2}{\theta_0} < qchisq(1-\alpha,n) \vert \theta \right) \\
+    &= 1 - P\left( \frac{\sum X_i^2}{\theta} < \frac{\theta_0\cdot qchisq(1-\alpha,n)}{\theta} \right)\\
+    &= 1 - pchisq\left( \frac{\theta_0\cdot qchisq(1-\alpha,n)}{\theta} , n \right)
+\end{align*}
+```{R}
+the1<-100:200/100
+power1<-0
+for (i in 1:length(the1)) {
+     power1[i]<-1-pchisq(qchisq(1-alp,n)*the0/the1[i],n)
+}
+library(ggplot2)
+ggplot(data.frame(the1,power1), aes(the1,power1))+geom_line()
+```
+
+## Solucion d
+Recordemos que: $$\dfrac{X_i^2}{\theta}\sim\chi^2_{(1)}$$
+
+Y observemos que:
+
+\begin{align*}
+var\left(\frac{X_i^2}{\theta} \right)&=  2\cdot 1 =2\\ \\
+E\left(\frac{X_i^2}{\theta} \right)&=1
+\end{align*}
+
+Entonces por el teorema de limite central, $$Z_n =\frac{ \frac{\sum X_i^2}{n\theta} - 1}{\sqrt{\frac{2}{n}}} = \frac{ \frac{\sum X_i^2}{n} - \theta}{\sqrt{\frac{2\theta^2}{n}}} \sim N(0,1)$$
+
+rechazamos $H_0$ para  $\{Z_n > z_{\alpha}\}$
+
+Reemplazando $\alpha=0.05, \theta_0=1$
+
+```{R}
+Z<-(thetahat-the0)/(sqrt(2*the0^2/n))
+c(Z,qnorm(1-alp))
+```
+como $2.540480>1.644854$ entonces $H_0$ se rechaza
+
+## Solucion e
+Hallemos el poder
+
+\begin{align*}
+    power2 &= 1 - P\left( \text{Aceptar } H_0 \vert H_a \text{Verdadera} \right) \\
+    &= 1 - P\left( Z_n < cv \vert \theta \right) \\
+    &= 1 - P\left(\frac{ \frac{\sum X_i^2}{n} - \theta_0}{\sqrt{\frac{2\theta_0^2}{n}}}< cv \vert \theta \right) \\
+    &= 1 - P\left( \frac{ \frac{\sum X_i^2}{n} - \theta}{\sqrt{\frac{2\theta^2}{n}}} < \dfrac{cv \sqrt{\frac{2\theta_0^2}{n}} + \theta_0 - \theta}{\sqrt{\frac{2\theta^2}{n}}} \right)\\
+    &= 1 - P\left( \frac{ \frac{\sum X_i^2}{n} - \theta}{\sqrt{\frac{2\theta^2}{n}}} < \dfrac{\sqrt{2}\cdot cv \cdot \theta_0 + \sqrt{n}(\theta_0-\theta_1)}{\sqrt{2}\theta} \right)\\
+    &= 1 - pnorm\left( \dfrac{\sqrt{2}\cdot cv \cdot \theta_0 + \sqrt{n}(\theta_0-\theta_1)}{\sqrt{2}\theta} \right)
+\end{align*}
+
+```{R}
+power2<-0
+cv<-qnorm(1-alp)
+for (i in 1:length(the1)) {
+    power2[i]<-1-pnorm((sqrt(2)*cv*the0+sqrt(n)*
+                    (the0-the1[i]))/(sqrt(2)*(the1[i])),0,1)
+}
+ggplot(data.frame(the1,power2), aes(the1,power2))+geom_line()
+```
+
+Veamos cual es mas poderoso
+
+```{R}
+pow<-data.frame(the1=c(the1, the1),Power=c(power1, power2),
+               Test=rep(c("Power1", "Power2"), each=101))
+ggplot(data=pow, aes(the1, Power, color=Test)) +
+  geom_line()
+```
+Por tanto, el test mas poderoso es el CLT que es el ejercicio d.

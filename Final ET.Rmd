@@ -1,0 +1,310 @@
+---
+title: "Final ET"
+author: "Sebastian Alzate Vargas"
+date: "18/5/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+ 
+# Solution 1
+a. Tenemos que $X \sim N(\mu_x,\sigma_x)$ y $Y \sim N(\mu_y,\sigma_y)$
+
+Observemos que
+
+$$\mathbb{E}\left(\overline{X}-\overline{Y}\right)=\mathbb{E}\left(\overline{X} \right)-\mathbb{E}\left(\overline{Y}\right)=\mu_x-\mu_y$$
+y
+
+$$Var\left(\overline{X}-\overline{Y}\right)=Var\left(\overline{X}\right)+Var\left(\overline{Y}\right)=\dfrac{\sigma_x^2}{n}+\dfrac{\sigma_y^2}{m}$$
+Entonces, $$\overline{X}-\overline{Y} \sim N\left(\mu_x-\mu_y \ , \ \sqrt{\dfrac{\sigma_x^2}{n}+\dfrac{\sigma_y^2}{m}} \right)$$
+
+
+Así, un intervalo de confianza del $(1-\alpha)100\%$ esta dado por:
+
+$$\left(\overline{X}-\overline{Y} - z_{\alpha/2}\sqrt{\dfrac{\sigma_x^2}{n}+\dfrac{\sigma_y^2}{m}} \ , \ \overline{X}-\overline{Y} + z_{\alpha/2}\sqrt{\dfrac{\sigma_x^2}{n}+\dfrac{\sigma_y^2}{m}} \right)$$
+b. Simulacion para un intervalo de confianza del $90\%$. Pongamos una funcion que depende de los tamaños
+
+```{r}
+fun1<-function(n,m){
+  tot<-0 # para contar quienes estan en el intervalo de confianza
+  sim<-10000
+  alpha<-0.1
+  ux <- 0; uy <- 1; sig1 <- 2; sig2 <- 3
+  for (i in 1:sim) {
+    x <- rnorm(n, ux, sig1)
+    y <- rnorm(m, uy, sig2)
+    xbar <- mean(x)
+    ybar <- mean(y)
+    sd <- sqrt((sig1^2)/n+(sig2^2)/m)
+    limsup<-xbar-ybar+qnorm(1-alpha/2)*sd
+    liminf<-xbar-ybar+qnorm(alpha/2)*sd
+    ifelse((ux-uy)<=limsup&(ux-uy)>=liminf,tot<-tot+1,tot<-tot)
+  }
+  round(tot/sim,3)
+}
+fun1(10,7)
+```
+Asi, el intervalo de confianza funciona
+
+c. Podemos usar la funcion anterior y hacer todas las posibles combinaciones de los tamaños
+```{r}
+tot2<-0
+for (i in 0:16) {
+  m <- 1+i
+  n <- 17-i
+  tot2[i] <- round(fun1(m,n),3)
+}
+tot2
+```
+Nos podemos dar cuenta que no importa el tamaño de la muestra obtener un intervalo de confianza del $90\%$
+
+# Solution 2
+```{r}
+x<-c(0.00, 0.03, 0.05, 0.06, 0.09, 0.10, 0.15, 0.15, 0.18, 0.19, 0.20,
+     0.20, 0.21, 0.27, 0.28, 0.29, 0.30, 0.30, 0.30, 0.31, 0.33, 0.34, 
+     0.34, 0.34, 0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.37, 0.38, 0.38, 
+     0.39, 0.39, 0.41, 0.41, 0.41, 0.43, 0.43, 0.43, 0.44, 0.44, 0.45, 
+     0.46, 0.46, 0.46, 0.46, 0.47, 0.47, 0.47, 0.47, 0.48, 0.49, 0.50, 
+     0.50, 0.50, 0.50, 0.50, 0.51, 0.52, 0.52, 0.53, 0.53, 0.53, 0.53,
+     0.55, 0.55, 0.56, 0.57, 0.57, 0.57, 0.57, 0.59, 0.60, 0.61, 0.61,
+     0.63, 0.64, 0.65, 0.68, 0.68, 0.68, 0.68, 0.70, 0.71, 0.72, 0.73, 
+     0.77, 0.78, 0.78, 0.80, 0.81, 0.82, 0.87, 0.93, 0.94, 0.98, 0.99, 
+     0.99)
+```
+
+La densidad conjunta esta dada por:
+\begin{align*}
+    f(\alpha,x)=\prod_{i=1}^n \left[\alpha+(1-\alpha)\frac1{\sqrt{2\pi0.1^2}}\exp \left\{-\frac1{2\times0.1^2}(x_i-0.5)^2 \right\} \right]\times 1
+\end{align*}
+ 
+ y la marginal es:
+ 
+ \begin{align*}
+     m(x)=\int_0^1 \prod_{i=1}^n \left[\alpha+(1-\alpha)\frac1{\sqrt{2\pi0.1^2}}\exp \left\{-\frac1{2\times0.1^2}(x_i-0.5)^2 \right\} \right] d\alpha
+ \end{align*} 
+ 
+ La cual no se puede resolver analíticamente, lo hacemos numéricamente 
+```{r}
+fun2 <- function(a){
+ prod(a+(1-a)*dnorm(x,0.5,0.1))
+}
+mx <- integrate(Vectorize(fun2),0,1)$value
+mx
+```
+
+ 
+ y la posterior es:
+ \begin{align*}
+     \pi(\alpha)= \dfrac{ f(\alpha,x)}{m(x)}=\dfrac{\prod_{i=1}^n \left[\alpha+(1-\alpha)\frac1{\sqrt{2\pi0.1^2}}\exp \left\{-\frac1{2\times0.1^2}(x_i-0.5)^2 \right\} \right]}{2802249}
+ \end{align*}
+
+```{r}
+posterior <- function(a){
+  fun2(a)/mx
+}
+```
+
+ 
+Para hallar el intervalo de credibilidad del $(1-\alpha)100\%$ tenemos 
+
+\begin{align*}
+    P(X \leq cv_1)=\alpha/2 \\
+    P(X \geq cv_2)=\alpha/2
+\end{align*}
+
+para limite inferior
+\begin{align*}
+    0.025=\int_0^{cv1} \pi(a\vert x) da
+\end{align*}
+```{r}
+cv1<-0
+repeat{
+  cv1<-cv1+0.001
+  if (integrate(Vectorize(posterior),0,cv1)$value>=0.025)break
+}
+```
+
+
+para limite superior
+\begin{align*}
+    0.025=\int_{cv2}^1 \pi(a\vert x) da
+\end{align*}
+
+```{r}
+cv2 <- cv1
+repeat{
+  cv2<-cv2+0.001
+  if (integrate(Vectorize(posterior),0,cv2)$value>=(1-0.025))break
+}
+cat('El intervalo es:', cv1,cv2)
+```
+
+
+
+# Solution 3
+Las funciones de densidades son:
+$$f_X(x) = \frac{(\varepsilon\lambda)^x e^{-\varepsilon\lambda}}{x!}\ \ , \ \ f_Z(z) = \binom{n}{z}\varepsilon^z(1-\varepsilon)^{n-z}$$
+
+La funcion conjunta es: $$f(x,z\vert\lambda,\varepsilon) = \frac{(\varepsilon\lambda)^x e^{-\varepsilon\lambda}}{x!}\binom{n}{z}\varepsilon^z(1-\varepsilon)^{n-z}$$
+
+La funcion LogLikelihood es: 
+$$l(\lambda,\varepsilon\vert x,z) = (x+z)\log(\varepsilon) + x\log(\lambda)-\varepsilon\lambda+(n-z)\log(1-\varepsilon) + \log\binom{n}{z}-\log(x!)$$
+
+Derivamos con respecto a $\lambda$,
+
+\begin{align*}
+    \frac{d l(\lambda,\varepsilon\vert x,z)}{d\lambda} &= \frac{x}{\lambda} - \varepsilon = 0 \ \ \Rightarrow \ \ \lambda = \frac{x}{\varepsilon}
+\end{align*}
+
+Derivamos con respecto a $\varepsilon$,
+
+\begin{align*}
+    \frac{d l(\lambda,\varepsilon\vert x,z)}{d\varepsilon} &= \frac{x+z}{\varepsilon} - \lambda - \frac{n-z}{1-\varepsilon} = 0 \\ \\
+    &\frac{(x+z)(1-\varepsilon) - \lambda\varepsilon(1-\varepsilon)-\varepsilon(n-z)}{\varepsilon(1-\varepsilon)} = 0 \\ \\
+    &\frac{z-\varepsilon n}{\varepsilon(1-\varepsilon)} = 0  \ \ \Rightarrow \ \  \varepsilon = \frac{z}{n}
+\end{align*}
+
+Bajo la hipótesis nula, $\lambda = 60$
+
+\begin{align*}
+    \frac{d l(\lambda,\varepsilon\vert x,z)}{d\varepsilon} &= \frac{x+z}{\varepsilon} - 60 - \frac{n-z}{1-\varepsilon} = 0 \\ 
+   & \frac{67+780}{\varepsilon} - 60 - \frac{1000-780}{1-\varepsilon} = 0 \\ \\
+   & \frac{60\varepsilon^2-1127\varepsilon+847}{\varepsilon(1-\varepsilon)} =0
+\end{align*}
+
+```{r}
+(1127+c(-1,1)*sqrt((1127)^2-4*60*847))/(2*60)
+```
+Como $\varepsilon$ es una probabilidad nos quedamos con $0.7843014$
+
+$\hat{\hat{\varepsilon}} = 0.78430$
+
+```{r}
+loglike <- function(l, e){
+  (x+z)*log(e)+x*log(l)-e*l+(n-z)*log(1-e)+
+    log(choose(n,z))-log(factorial(x))
+}
+ehathat=0.78430  
+x<-67
+n<-1000
+z<-780
+e<- z/n
+lrt <- 2*(loglike(x/e, z/n)-loglike(60, ehathat))
+1-pchisq(lrt,1)
+```
+Entonces rechazamos la hipotesis nula. Es decir, $\lambda>60$
+
+
+# Solution 4 
+a. \begin{align*}
+    \overline{x} = m_1 &= E(X) \\\overline{x} &= \sum_{x=0}^2 x\cdot P(X=x) \\
+   \overline{x} &= 0\cdot \frac{p+0}{3(p+1)} + 1\cdot \frac{p+1}{3(p+1)} + 2\cdot \frac{p+2}{3(p+1)} \\
+   \overline{x} &= \frac{3p+5}{3(p+1)}
+\end{align*}
+Entonces, $\hat{p} = \dfrac{3\overline{x}-5}{3-3\overline{x}}$
+
+b.
+\begin{align*}
+    L(p|x) = \frac{p}{3(p+1)}\mathbb{I}(x=0) + \frac{p+1}{3(p+1)}\mathbb{I}(x=1) + \frac{p+2}{3(p+1)}\mathbb{I}(x=2)
+\end{align*}
+
+
+Si $x=0$ entonces $L(p|x) = \frac{p}{3(p+1)}$. Derivamos y obtenemos
+    $$\frac{d}{dp}L(p|x) = \frac{3}{(3(p+1))^2} = 0$$
+    No tiene solucion para $p$, entonces no existe el maximo.
+    
+Si $x=1$ entonces $L(p|x) = \frac{p+1}{3(p+1)}=\frac{1}{3}$. Entonces el maximo se alcanza en cualquier valor de $p$.
+    
+Si  $x=2$ entonces $L(p|x) = \frac{p+2}{3(p+1)} = \frac{1}{3}$. Derivamos y obtenemos
+    $$\frac{d}{dp}L(p|x) = \frac{9}{(3(p+1))^2} = 0$$
+    No tiene solucion para $p$, entonces no existe el maximo.
+
+
+c. Conjunta
+
+\begin{align*}
+    f(x,p) = \frac{p}{3(p+1)}\mathbb{I}(x=0)\cdot 1 + \frac{p+1}{3(p+1)}\mathbb{I}(x=1)\cdot 1 + \frac{p+2}{3(p+1)}\mathbb{I}(x=2)\cdot 1
+\end{align*}
+
+Hallemos cada marginal por separado.
+
+Si $x=0$, tenemos que 
+\begin{align*}
+    m(x) = \int_0^1 \frac{p}{3(p+1)} dp = \frac{1}{3} - \frac{1}{3} \log(2)
+\end{align*}
+
+Si $x=1$, tenemos que 
+\begin{align*}
+    m(x) = \int_0^1 \frac{p+1}{3(p+1)} dp = \frac{1}{3} 
+\end{align*}
+
+Si $x=2$, tenemos que 
+\begin{align*}
+    m(x) = \int_0^1 \frac{p+2}{3(p+1)} dp = \frac{1}{3} - \frac{1}{3} \log(2)
+\end{align*}
+
+
+Entonces, la posterior por separado,
+
+
+ Si $x=0$, tenemos que 
+\begin{align*}
+   \pi(p) = \frac{\frac{p}{3(p+1)}}{\frac{1}{3} - \frac{1}{3} \log(2)}
+\end{align*}
+
+ Si $x=1$, tenemos que 
+\begin{align*}
+    \pi(p) = \frac{\frac{p+1}{3(p+1)}}{\frac{1}{3} }
+\end{align*}
+
+ Si $x=2$, tenemos que 
+\begin{align*}
+   \pi(p) = \frac{\frac{p+2}{3(p+1)}}{\frac{1}{3} + \frac{1}{3} \log(2)}
+\end{align*}
+
+
+La media de la posterior,
+
+\begin{align*}
+    \mathbb{E}(p) &= \int_0^1 \frac{\frac{p}{3(p+1)}}{\frac{1}{3} - \frac{1}{3} ln(2)}\mathbb{I}(x=0) dp +   \int_0^1 \frac{\frac{p+1}{3(p+1)}}{\frac{1}{3} }\mathbb{I}(x=1) dp +  \int_0^1 \frac{\frac{p+2}{3(p+1)}}{\frac{1}{3} + \frac{1}{3} ln(2)}\mathbb{I}(x=2) dp \\
+    &=  \int_0^1 \frac{p^2}{(p+1)(1-\log(2))}\mathbb{I}(x=0) dp +   \int_0^1 p\mathbb{I}(x=1) dp +  \int_0^1 \frac{p^2+2p}{(p+1)(1+\log(2))}\mathbb{I}(x=2) dp\\
+     &= \frac{2\ln \left(2\right)-1}{2\left(1-\ln \left(2\right)\right)} \cdot\mathbb{I}(x=0) +    \frac{1}{2}\cdot\mathbb{I}(x=1) +   \frac{1}{1+\ln \left(2\right)}\left(\frac{3}{2}-\ln \left(2\right)\right)\cdot\mathbb{I}(x=2)
+\end{align*}
+
+# Solution 5
+la función de densidad esta dada por:
+\begin{align*}
+    f(x\vert\mu,\sigma)=\dfrac{\Gamma(2)}{\Gamma(3/2)\sqrt{3\pi}}\left(1+\dfrac{(x-\mu)^2}{3\sigma^2} \right)^{-2}
+\end{align*}
+
+La función Likelihood esta dada por:
+\begin{align*}
+    f(\mu,\sigma\vert x)&=\prod \dfrac{\Gamma(2)}{\Gamma(3/2)\sqrt{3\pi}}\left(1+\dfrac{(x_i-\mu)^2}{3\sigma^2} \right)^{-2}\\
+    &=\left(\dfrac{\Gamma(2)}{\Gamma(3/2)\sqrt{3\pi}} \right)^n\prod \left(1+\dfrac{(x_i-\mu)^2}{3\sigma^2} \right)^{-2}\\
+\end{align*}
+
+\begin{align*}
+    l(\mu,\sigma)=n\log \left(\dfrac{\Gamma(2)}{\Gamma(3/2)\sqrt{3\pi}} \right)-2\sum \log \left(1+\dfrac{(x_i-\mu)^2}{3\sigma^2} \right)
+\end{align*}
+```{r}
+x<-c(7.04, 18.91, 19.13, 19.68, 20.01, 21.63,22.44, 22.96, 23.14, 
+     23.3, 23.48, 24.14, 24.69, 25.08, 25.86, 25.88, 26.23, 26.43, 26.54, 
+     26.81, 27.26, 27.55, 27.65, 27.72, 27.73, 27.97, 28, 28.03, 28.1, 
+     28.31, 28.32, 28.35, 28.41, 28.46, 28.47, 28.57, 28.74, 28.77, 
+     28.78, 29.21, 29.23, 29.38, 29.66, 29.69, 29.71, 29.76, 30.08, 
+     30.24, 30.29, 30.42, 30.49, 30.49, 30.52, 30.61, 30.63, 30.71, 
+     30.74, 30.74, 30.75, 30.75, 30.8, 30.83, 31.19, 31.22, 31.22, 
+     31.4, 31.51, 31.53, 31.56, 31.75, 31.78, 32.06, 32.46, 32.66, 
+     32.76, 32.85, 32.85, 32.96, 32.99, 33.33, 33.34, 33.35, 33.38, 
+     33.53, 33.53, 33.62, 33.69, 34.52, 34.52, 35.12, 35.48, 36.21, 
+     36.33, 36.53, 36.58, 37.03, 38.08, 38.7, 40.58, 57.05)
+n<-length(x)
+f <- function(esti){
+  -(n*log(gamma(2)/(sqrt(3*pi)*gamma(3/2)))- 
+      2*sum(log(1 + (x-esti[1])^2/(3*esti[2]^2))))
+} 
+nlm(f,c(0.01,0.01),hessian = TRUE)
+```
+Los estimados son $\hat\mu=29.9391$ y $\hat\sigma^2=501.8772$
+
+

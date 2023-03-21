@@ -1,0 +1,114 @@
+---
+title: "Tarea 3 TE"
+author: "Sebastian Alzate Vargas"
+date: "Febrero 11/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Problema 1
+Sea $X_1,..,X_n$ una muestra de una mezcla de distribuciones normales con densidad: 
+$$f(x;\mu,\sigma)=\frac1{2\sqrt{2\pi}}\exp\{-\frac12 x^2\}+\frac1{2\sqrt{2\pi\sigma^2}}\exp\{-\frac1{2\sigma^2} (x-\mu)^2\}$$
+Sea $L(\mu,\sigma)$ la funcion likelihood. Muestre que $\max \{L(\mu,\sigma):-\infty<\mu<\infty;0<\sigma<\infty\}=\infty$
+
+## Solución 1
+La función likelihood esta dada por:
+\begin{align*}
+    L(\mu, \sigma) &= \prod_{i=1}^n f(x_i;\mu,\sigma)\\
+    &= \prod_{i=1}^n \left( \frac1{2\sqrt{2\pi}}\exp\{-\frac12 x_i^2\}+\frac1{2\sqrt{2\pi\sigma^2}}\exp\{-\frac1{2\sigma^2} (x
+    _i-\mu)^2\}\right)
+\end{align*}
+Consideremos el siguiente conjunto $A= \{L(\mu, \sigma)$ : $-\infty<\mu<\infty;0<\sigma<\infty\}$, la idea es encontrar un subconjunto de $A$ que no este acotado y concluir que $\max A = \infty$
+
+Si consideremos 
+$\mu=x_i$ y $\sigma=\frac{1}{n}$, $n\in \mathbb{N}$ que es un subconjunto de $A$. Obtenemos que
+\begin{align*}
+    max(A) &\geq \underset{\underset{\mu=x_i}{\sigma=1/n}}{max} \left\{ \frac1{2\sqrt{2\pi}}\exp\{-\frac12 x_i^2\}+\frac1{2\sqrt{2\pi\sigma^2}}\exp\{-\frac1{2\sigma^2} (x
+    _i-\mu)^2\}\right\} \\
+    &= \underset{\sigma=1/n}{max} \left\{ \frac1{2\sqrt{2\pi}}\exp\{-\frac12 \mu^2\}+\frac1{2\sqrt{2\pi\sigma^2}}\exp\{-\frac1{2\sigma^2} (\mu-\mu)^2\}\right\} \\
+    &= \underset{n \in \mathbb{N}}{max} \left\{ \frac1{2\sqrt{2\pi}}\exp\{-\frac12 \mu^2\}+\frac{n}{2\sqrt{2\pi}}\right\}=\infty \\
+    \mbox{cuando $n$ tiende a $\infty$}
+\end{align*}
+Así, podemos concluir que el $\max A=\infty$, lo que es equivalente a decir que: $$\max \{L(\mu, \sigma) : -\infty<\mu<\infty;0<\sigma<\infty\}=\infty$$
+
+# Problema 2
+Sea $X\sim Beta(a, 1)$. Encuentre la distribución posteriori cuando la apriori es $\pi(a)=1/a,a>1$
+
+## Solución 2
+La función apriori esta definida por $$\pi(a|x) = \frac{f(x|a)\pi(a)}{m(x)}$$
+Hallemos cada uno de esos factores. Como $X\sim Beta(a,1)$ entonces, 
+
+\begin{align*}
+    f(x|a)&=\dfrac{x^{a-1}(1-x)^{1-1}}{B(a,1)} \\
+    &= \frac{\Gamma(a+1)\cdot x^{a-1}}{\Gamma(a)\Gamma(1)}  \\
+    &=  \frac{\Gamma(a+1)\cdot x^{a-1} }{\Gamma(a)} \\
+    &= \frac{a\cdot \Gamma(a)\cdot x^{a-1}}{\Gamma(a)}  \\
+    &= ax^{a-1}
+\end{align*}
+prior predictive distribution esta dada por:
+ \begin{align*}
+     m(x) &= \int_{-\infty}^{\infty}f(x,a)da\\
+     &= \int_{1}^{\infty}f(x|a)\pi(a)da \ \   \mbox{para $a>1$}\\
+     &= \int_{1}^{\infty}ax^{a-1}\cdot \frac{1}{a}da \\
+      &= \int_{1}^{\infty}\dfrac{x^{a}}{x}da \\
+     &=  \left(\frac{1}{x}\cdot\frac{x^a}{ln(x)}\right)_1^{\infty} \\
+     &= \left(0-\frac{1}{x}\cdot\frac{x}{ln(x)}\right) \ \ \mbox{pues $x \in (0,1)$}\\
+     &= -\frac{1}{ln(x)}
+ \end{align*}
+Reemplazando todos los resultados anteriores, obtenemos
+\begin{align*}
+    \pi(a|x) &= \frac{f(x|a)\pi(a)}{m(x)} \\
+    &= \frac{ax^{a-1}\cdot \frac{1}{a}}{-\frac{1}{ln(x)}} \\
+    &= \frac{x^{a-1}}{-\frac{1}{ln(x)}} \\
+    &= -x^{a-1}ln(x)  \\
+    &= -\dfrac{x^{a}ln(x)}{x}
+\end{align*}
+para $a>1$
+
+# Problema 3
+Encuentre el estimador Bayesiano de $p$ usando la media de la distribución posteriori y la apriori esta dada por $p\sim U[0,1]$
+
+## Solución 
+Primero encontremos la función posteriori, que esta dada por: $$\pi(p|x) = \frac{f(x|p)\pi(p)}{m(x)}$$
+Donde la distribución apriori se define
+$$
+\pi(p)=\begin{cases} 1
+& \mbox{si $p \in [0,1]$,}\\
+0 & \mbox{e.o.c}
+\end{cases}
+$$
+Y la función $f(k|p)$ es una distribución geométrica para cada intento. Entonces si tenemos $k$ éxitos de $r$ intentos entonces tenemos una distribución binomial negativa, que su función de distribución esta dada por:
+
+
+$$f(k|p)= \binom{r-1}{k-1}p^{k}(1-p)^{r-k}$$ 
+
+de la tabla tenemos: $k=100$ y $r=161$. Así
+
+\begin{align*}
+f(k|p)&= \binom{161-1}{100-1}p^{100}(1-p)^{161-100}\\
+      &= \binom{160}{99}p^{100}(1-p)^{61}
+\end{align*}
+
+Ahora podemos hallar prior predictive distribution.
+\begin{align*}
+    m(k)&=\int f(k|p)\pi(p)dp\\
+    &=\int_0^1\binom{160}{99}p^{100}(1-p)^{61}\cdot 1 dp \\
+    &= \binom{160}{99}\int_0^1p^{101-1}(1-p)^{62-1}dp \\
+    &= \binom{160}{99} B(101,62)
+\end{align*}
+Así, la función posteriori es igual a: 
+\begin{align*}
+    \pi(p|k)&= \dfrac{f(k|p) \pi(p)}{m(k)}\\
+    &=\dfrac{\binom{160}{99}p^{101-1}(1-p)^{62-1}}{\binom{160}{99}B(101,62)}\\
+    &= \dfrac{\Gamma(101+62)}{\Gamma(101)\Gamma(62)}p^{101-1}(1-p)^{62-1} \ \  \mbox{para $p \in [0,1]$}\\
+    &=B(101,62)
+\end{align*}
+Usando la esperanza de la distribución Beta
+\begin{align*}
+    \mathbb{E}(p|k)&=\dfrac{\alpha}{\alpha+\beta}\\
+    &=\dfrac{101}{101+62}\\
+    &=\dfrac{101}{163}\\
+    &\approx0,6196
+\end{align*}
+Entonces $p\approx0,6196$.

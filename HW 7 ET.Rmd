@@ -1,0 +1,202 @@
+---
+title: "Tarea 7 ET"
+author: "Sebastian Alzate Vargas"
+date: "Febrero 11/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+Digamos que tenemos una muestra de tamaño $n$ de una variable aleatoria geométrica con radio $p$, con $P(X=x)=p(1-p)^{x-1}$, $x=1,2,...$
+
+# Problema 1
+Encuentre el mle de $p$
+
+## Solución 1
+\begin{align*}
+    L(p\vert\pmb{x})&=f(\pmb{x}\vert p)\\
+    &=\prod_{i=1}^{n}f(x_i\vert p)\\
+    &=\prod_{i=1}^{n} p(1-p)^{x_i-1}\\
+    &=p^n(1-p)^{\sum x_i-n}\\
+\end{align*}
+Así, la funcion log de likelihood esta dada por:
+\begin{align*}
+    l(p\vert\pmb{x})&=n\log(p)+\left(\sum_i x_i-n\right)\log (1-p)
+\end{align*}
+Derivando con respecto a $p$ e igualando a cero, tenemos:
+\begin{align*}
+    \dfrac{d l(p\vert\pmb{x})}{dp}&=\dfrac{n}{p}-\dfrac{\sum_i x_i-n}{1-p}\\
+    &=\dfrac{n-pn-p\sum x_i +pn}{p(1-p)}\\
+    &=\dfrac{n-p\sum x_i}{p(1-p)}=0
+\end{align*}
+Asi,
+\begin{align*}
+    \hat{p}&=\dfrac{n}{\sum x_i}\\&=\dfrac{1}{\overline{X}}
+\end{align*}
+
+Reemplazando nuestros datos
+```{R }
+x<-c(1:6)
+y<-c(49,23,14,8,4,2)
+phat<-1/(sum(x*y)/sum(y))
+phat
+```
+
+# Problema 2
+Derivar una prueba de hipótesis exacta para
+$$H_0: p=p_0\text{ vs. }H_a:p>p_0$$
+Basado en el mle
+
+
+## Solución 2
+Si $p>p_0$, entonces si $1/\overline{X}$ esta cercano a $p_0$ vamos aceptar $H_0$. Entonces se rechaza si es mayor que un punto critico, en otras palabras:
+\begin{align*}
+    \alpha&=P\left(\frac{1}{\overline{X}}>k \vert p=p_0 \right)\\
+    &=P\left(\overline{X}<cv \vert p=p_0 \right)
+\end{align*}
+Ahora definamos $Y=\sum x_i \sim NBinom(n,p_0)$. Así,
+\begin{align*}
+    \alpha&=P\left(\sum x_i<cv\cdot n \vert p=p_0 \right)\\
+    &=\sum_{k=0}^{cv\cdot n}\binom{n+k-1}{n-1}p^n(1-p)^k
+\end{align*}
+
+# Problema 3
+Encuentra el poder de esta prueba. Úselo para dibujar la curva de potencia para el caso $n=100, p_0=0.5,\alpha=0.05$ y $p_1\in [0.5,0.65]$
+
+## Solución 3
+Para hallar el poder notemos que:
+
+\begin{align*}
+    \beta&=P(\text{Aceptar $H_0$} \vert \text{$H_1$ es verdadera})\\
+    \beta&=P(Y>cv\cdot n\vert p=p_1)\\
+    \beta&=1-P(Y\leq cv\cdot n\vert p=p_1)\\
+    1-\beta&=P(Y\leq cv\cdot n\vert p=p_1)\\
+    poder&=P(Y\leq cv\cdot n\vert p=p_1)
+\end{align*}
+Para encontrar el valor critico vamos a usar la siguiente funcion:
+```{R }
+funcv<-function(n,p){
+  k<-0
+  suma<-0
+  repeat {
+    suma<-suma+choose(k+n-1,n-1)*(p)^(n)*(1-p)^(k)
+    if (suma>=0.05){
+      return(k/n)
+      break
+    }
+    k<-k+1
+    suma<-suma
+  }
+}
+funcv(100,0.5)
+```
+Así, el $cv=0.78$. Necesitamos la funcion de distribución de $Y$ para encontrar el poder.
+```{R}
+fundis<-function(n,cv,p1){
+  acum<-0
+  for (i in 0:cv) {
+    acum<-acum+choose(i+n-1,n-1)*(p1)^(n)*(1-p1)^(i)
+  } 
+  acum
+}
+```
+El poder vienen dado por:
+```{R }
+poder<- function(n,p,p1) {
+  cv<-funcv(n,p)*n
+  fundis(n,cv,p1)
+}
+```
+Para hacer la grafica, vamos a usar lo siguiente:
+```{R}
+pa<-50:65/100
+y<-0
+for (i in 1:length(pa)) {
+  y[i]<-poder(100,0.5,p1=pa[i])
+}
+library(ggplot2)
+ggplot(data=data.frame(pa,y),aes(pa,y))+geom_line()
+```
+
+# Problema 4
+Si de hecho $p = 0,54$, ¿qué tamaño de muestra n se necesitaría para que la prueba tenga una potencia del $80\%$?
+
+## Solución 4
+```{R}
+for (i in 1:1000) {
+  if (poder(i,0.5,0.54)>=0.80){
+    print(i)
+    break
+  }
+}
+```
+El tamaño de la muestra que necesitamos es $500$. Lo podemos verificar con la función poder
+```{R }
+poder(500,0.5,0.54)
+```
+
+# Problema 5
+Encuentre otra prueba, nuevamente basada en el mle pero ahora usando una aproximación normal (también conocido como el teorema del límite central). Para el caso $n=100,\alpha=0.05,p_1=0.6$. Cuál de estas pruebas es más poderosa?
+
+## Solución 5
+Con el mismo razonamiento del ejercicio 1, tenemos que si $1/\overline{X}$ esta muy cerca a $p_0$, deberíamos aceptar $H_0$. En caso contrario lo rechazamos. Lo que es equivalente a decir que $\overline{X}$ esta cerca a $1/p_0$.
+
+Como $E(x_i)=\frac{1}{p}$ y $var(x_i)=\frac{1-p}{p^2}$, entonces por el teorema de limite central tenemos que:
+$$\sqrt{n}\dfrac{\overline{X}-\frac{1}{p}}{\frac{\sqrt{1-p}}{p}} \sim N(0,1)$$
+Como $p>p_0$ entonces $1/p_0>1/p$. Así rechazamos $H_0$ si
+\begin{align*}
+    \sqrt{n}\dfrac{\overline{X}-\frac{1}{p_0}}{\frac{\sqrt{1-p_0}}{p_0}}&<z_{\alpha/2}\\
+    \sqrt{n}\dfrac{p_0\overline{X}-1}{\sqrt{1-p_0}}&<z_{\alpha/2}
+\end{align*}
+Encontremos el valor critico
+\begin{align*}
+    \alpha&=P\left(\sqrt{n}\dfrac{p_0\overline{X}-1}{\sqrt{1-p_0}}<cv\vert p=p_0 \right)\\
+    \alpha&=P\left(\sqrt{n}\dfrac{p_0\overline{X}-1}{\sqrt{1-p_0}}< cv\vert p=p_0 \right)\\
+    \alpha&=\phi(cv)\\
+    cv&=\phi^{-1}(\alpha)\\
+    cv&=\phi^{-1}(0.05)\\
+    cv&=-1.644854
+\end{align*}
+Encontremos $\beta$
+\begin{align*}
+    \beta =&P\left(Z>cv\vert p=p_1\right)\\
+    =&1-P\left(\sqrt{n}\dfrac{\overline{X}-\frac{1}{p_0}}{\frac{\sqrt{1-p_0}}{p_0}}\leq cv\vert p=p_1 \right)\\
+    =&1-P\left(\sqrt{n}\left(\overline{X}-\frac{1}{p_0}\right)\leq cv \frac{\sqrt{1-p_0}}{p_0}\vert p=p_1 \right)\\
+    =&1-P\left(\sqrt{n}\overline{X}\leq cv \frac{\sqrt{1-p_0}}{p_0}+\frac{\sqrt{n}}{p_0}\vert p=p_1 \right)\\
+     =&1-P\left(\sqrt{n}\left(\overline{X}-\frac{1}{p_1}\right)\leq cv \frac{\sqrt{1-p_0}}{p_0}+\frac{\sqrt{n}}{p_0}-\frac{\sqrt{n}}{p_1}\vert p=p_1 \right)\\
+     =&1-P\left(\sqrt{n}\dfrac{\overline{X}-\frac{1}{p_1}}{\frac{\sqrt{1-p_1}}{p_1}}\leq cv \frac{\sqrt{1-p_0}}{p_0}+\frac{\sqrt{n}}{p_0}-\frac{\sqrt{n}}{p_1}\vert p=p_1 \right)\\
+     =&1-P\left(\sqrt{n}\dfrac{\overline{X}-\frac{1}{p_1}}{\frac{\sqrt{1-p_1}}{p_1}}\leq\dfrac{cv\sqrt{1-p_0}/p_0+\sqrt{n}/p_0-\sqrt{n}/p_1}{\sqrt{1-p_1}/p_1} \vert p=p_1 \right)\\
+\end{align*}
+Asi, el poder esta dado por 
+\begin{align*}
+    poder&=1-\beta\\
+    poder&=\phi\left(\dfrac{cv\sqrt{1-p_0}/p_0+\sqrt{n}/p_0-\sqrt{n}/p_1}{\sqrt{1-p_1}/p_1} \right)
+\end{align*}
+
+Definamos la función de distribución de la normal
+```{R }
+phi<-function(x){
+  1/sqrt(2*pi)*exp(-x^2/2)
+}
+```
+Como ya conocemos nuestro valor de $cv$ podemos encontrar el poder
+```{R }
+power1<-function(n,p,p1){
+  cv1<-(-1.644854*sqrt(1-p)/p+sqrt(n)*(1/p-1/p1))/(sqrt(1-p1)/p1)
+  integrate(phi,-Inf,cv1)$value
+}
+```
+Ahora podemos hacer la grafica de poder, utilizando los mismos valores de la graficas anteriores.
+```{R }
+y1<-0
+for (i in 1:length(pa)) {
+  y1[i]<-power1(100,0.5,pa[i])
+}
+ggplot(data=data.frame(pa,y1),aes(pa,y1))+geom_line()
+```
+Veamos cual es mas poderoso con una gráfica.
+```{R }
+df <- data.frame(x=c(pa, pa),
+                 y=c(y, y1), Poder=rep(c("Test 1", "Test 2"), each=16) )
+ggplot(data=df, aes(x, y, color=Poder)) + geom_line()
+```
+Asi, el test 1 es más poderoso.

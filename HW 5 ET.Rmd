@@ -1,0 +1,204 @@
+---
+title: "Tarea 5 ET"
+author: "Sebastian Alzate Vargas"
+date: "Febrero 25/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Problema 1
+Tenemos una observación de una variable aleatoria $f(x|\theta)$ donde $\theta \in \{1,2,3\}$. 
+
+![](C:\Users\sebas\Documents\Rolke\Teoria de estadistica\Tarea 5/Imagen tarea 5.png)
+
+Encuentre el mle de $\theta$
+
+## Solución 1
+Consideremos la siguiente función:
+
+$${1}_{\theta=i}(\theta)= \left\{ \begin{array}{lcc}
+             1 &   si  & \theta = i \\
+             \\ 0 &  si & \theta \neq i
+             \end{array}
+   \right.$$
+
+
+\begin{align*}
+    L(\theta)&=L(x_0, ... , x_4\vert\theta)\\
+    &=f(x_0\vert \theta)\times...\times f(x_4\vert \theta)\\
+    &=\prod_{i=0}^4 \left(f(x_i\vert \theta) 1_{\theta=1}(\theta) + f(x_i\vert \theta)1_{\theta=2}(\theta)+f(x_i\vert \theta)1_{\theta=3}(\theta)\right)
+\end{align*}
+
+
+entonces $L(\theta)$ se maximiza cuando cada uno de esos factores toma sus mayores valores. Podemos proceder en cada caso
+
+Cuando $x=0$, $\max L(\theta \vert x)=1/3$ que es en $f(0\vert1)$, entonces el mle es $\theta=1$
+
+Cuando $x=1$, $\max L(\theta \vert x)=1/3$ que es en $f(1\vert1)$, entonces el mle es $\theta=1$
+
+Cuando $x=2$, $\max L(\theta \vert x)=1/4$ que es en $f(2\vert2)=f(2\vert3)$, entonces el mle es $\theta=2\  \mbox{ó}\ 3$
+
+Cuando $x=3$, $\max L(\theta \vert x)=1/2$ que es en $f(3\vert3)$, entonces el mle es $\theta=3$
+
+Cuando $x=4$, $\max L(\theta \vert x)=1/4$ que es en $f(4\vert3)$, entonces el mle es $\theta=3$
+
+# Problema 2
+Tenemos una muestra de tamaño $n$ de un vector aleatorio con distribución:
+
+donde $\alpha>1$ y $\beta>0$
+
+![](C:\Users\sebas\Documents\Rolke\Teoria de estadistica\Tarea 5/Imagen 2 tarea 5.png)
+
+a. Si conocemos a $\beta$, cuál es el mle de $\alpha$?
+
+Para los puntos b-e, supongamos que conocemos a $\alpha$
+
+b. Cuál es el mle $\beta$?
+
+c. el mle de $\beta$ es un estadistico suficiente?
+
+d. el mle de $\beta$ es insesgado?
+
+e. el mle de $\beta$ es consistente?
+
+f. muestre que la cota inferior de Rao-Cramer para $\beta$ no se cumple.
+
+## Solución a
+Tenemos que la función de distribución esta dada por:
+\begin{align*}
+    F_X(x\vert\alpha,  \beta)=\left(\dfrac{x}{\beta}\right)^{\alpha} \ \ \ \mbox{para} \ \ 0<x<\beta
+\end{align*}
+
+Para encontrar la función de densidad podemos derivar la función anterior 
+
+\begin{align*}
+    f_X(x\vert\alpha, \beta)&=\dfrac{d}{d x}F_X(x\vert\alpha,  \beta)\\
+    &=\dfrac{d}{dx}\left(\dfrac{x}{\beta}\right)^{\alpha}\\
+    &=\alpha\cdot\left(\dfrac{x}{\beta}\right)^{\alpha-1}\cdot\dfrac{1}{\beta}
+\end{align*}
+
+Ahora, encontremos la funcion likelihood para el parametro $\alpha$
+
+\begin{align*}
+    L(\alpha)=\prod f_X(\pmb{x}\vert\alpha, \beta)=\prod_{i=1}^n\dfrac{\alpha}{\beta}\left(\dfrac{x_i}{\beta}\right)^{\alpha-1}
+\end{align*}
+la función $\ln{L(\alpha})$ esta dada por:
+\begin{align*}
+    \ln{L(\alpha})&=\ln\prod_{i=1}^n\dfrac{\alpha}{\beta}\left(\dfrac{x_i}{\beta}\right)^{\alpha-1}\\
+    &=\ln\left(\dfrac{\alpha}{\beta}\right)^n\prod_{i=1}^n\left(\dfrac{x_i}{\beta}\right)^{\alpha-1}\\
+    &=n\ln\dfrac{\alpha}{\beta}+\ln\prod_{i=1}^n\left(\dfrac{x_i}{\beta}\right)^{\alpha-1}\\
+    &=n\ln(\alpha)-n\ln{(\beta)}+\sum_{i=1}^n\ln\left(\dfrac{x_i}{\beta}\right)^{\alpha-1}\\
+    &=n\ln(\alpha)-n\ln{(\beta)}+({\alpha-1})\sum_{i=1}^n\ln\left(\dfrac{x_i}{\beta}\right)\\
+    &=n\ln(\alpha)-n\ln{(\beta)}+({\alpha-1})\left[\sum_{i=1}^n\ln(x_i)-n\ln(\beta)\right]\\
+\end{align*}
+Derivando con respecto a $\alpha$ para encontrar el máximo, obtemos
+\begin{align*}
+    \dfrac{d \ln{L(\alpha)}}{d\alpha}&=\dfrac{n}{\alpha}+\sum_{i=1}^n \ln(x_i)-n\ln(\beta)
+\end{align*}
+igualando a cero
+\begin{align*}
+    0&=\dfrac{n}{\alpha}+\sum_{i=1}^n \ln(x_i)-n\ln(\beta)\\
+    \hat{\alpha}&=\dfrac{n}{n\ln(\beta)-\sum_{i=1}^n \ln(x_i)}\\
+    \hat{\alpha}&=\dfrac{n}{n\ln(\beta)-n\overline{\ln(X)}}\\
+    \hat{\alpha}&=\dfrac{1}{\ln(\beta)-\overline{\ln(X)}}
+\end{align*}
+
+## Solución b
+Tenemos que la función de densidad es igual a: $\dfrac{\alpha}{\beta^\alpha}x^{\alpha-1}$
+
+Así, la función likelihood para el parámetro $\beta$ es: $$L(\beta)=\prod_{i=1}^n\dfrac{\alpha}{\beta^\alpha}x_i^{\alpha-1}=\dfrac{\alpha^n}{\beta^{n\alpha}}\prod_{i=1}^nx_i^{\alpha-1}$$
+
+No podemos encontrar el máximo con su derivada, con respecto a $\beta$. Es claro que $L(\beta)$ es una función decreciente ya que $0<x_i<\beta$, entonces se maximiza al seleccionar $\beta$ tan pequeño como sea posible, es decir, tiene que ser lo más cercano a una de esas observaciones. Entonces:
+$$\hat{\beta}=\max\{x_1,...,x_n\}=x_{[n]}$$
+
+## Solución c
+Tenemos que $$L(\beta) = \frac{\alpha^n}{\beta^{n\alpha}} \prod_{i=1}^n x_i^{\alpha-1}$$
+
+Sin perdida de generalidad, supongamos que $x_j = x_{[n]}$. Entonces,
+\begin{align*}
+    L(\beta) &= \frac{\alpha^n}{\beta^{n\alpha}} \prod_{i=1}^n x_i^{\alpha-1} \\
+    &= \frac{\alpha^n}{\beta^{n\alpha}} \cdot x_j^{\alpha-1} \cdot \prod_{\overset{i=1}{i\neq j}}^n x_i^{\alpha-1}
+\end{align*}
+
+Si $g\left( x_{[n]} \vert \beta \right) = \frac{\alpha^n}{\beta^{n\alpha}} \cdot x_j^{\alpha-1}$, y $h(\pmb{x}) = \prod_{\overset{i=1}{i\neq j}}^n x_i^{\alpha-1}$. Entonces,
+$$ L(\beta) = g\left( x_{[n]} \vert \beta \right)\cdot h(\pmb{x})$$
+Asi, $x_{[n]}$ es suficiente para $\beta$.
+
+
+## Solución d
+Primero hallemos la función de distribución de $X_{[n]}$
+\begin{align*}
+    F_{X_{[n]}}(x) &= P(X_{[n]} \leq x) \\
+    &= P(\mbox{max}\{X_1, \cdots,X_n\} \leq x) \\
+    &= P(X_1 \leq x)P(X_2 \leq x)\cdots P(X_n \leq x) \\
+    &= \left(\left(\frac{x}{\beta}\right)^{\alpha}\right)^n \\
+    &= \left(\frac{x}{\beta}\right)^{n\alpha}
+\end{align*}
+Entonces, podemos derivar para encontrar su función de distribución 
+\begin{align*}
+     f_{X_{[n]}}(x) &= \frac{d}{dx}\left[ F_{X_{[n]}}(x)\right] \\
+     &= n\alpha \left(\frac{x}{\beta}\right)^{n\alpha-1}\cdot \frac{1}{\beta}\\
+     &= \frac{n\alpha}{\beta^{n\alpha}}x^{n\alpha-1}
+\end{align*}
+Asi, su valor esperado es igual a:
+\begin{align*}
+    E(X_{[n]}) &= \int_{-\infty}^{\infty} x f_{X_{[n]}}(x) dx \\
+    &= \int_{0}^{\beta} x \frac{n\alpha}{\beta^{n\alpha}}x^{n\alpha-1} dx \\
+    &= \frac{n\alpha}{\beta^{n\alpha}} \left[ \frac{x^{n\alpha+1}}{n\alpha+1} \right]  \vert_0^{\beta} \\
+    &= \frac{n\alpha}{\beta^{n\alpha}} \left[ \frac{\beta^{n\alpha+1}}{n\alpha+1} \right] \\
+    &= \frac{n\alpha}{n\alpha+1} \beta 
+\end{align*}
+Entonces, $X_{[n]}$ no es insesgado.
+
+
+## Solución e
+\begin{align*}
+    &\lim_{n\rightarrow \infty} P\left( \vert X_{[n]} - \beta \vert \leq \epsilon \right) \\
+    =&\lim_{n\rightarrow \infty} P\left( \beta - \epsilon \leq X_{[n]} \leq \beta + \epsilon \right) \\
+    =&\lim_{n\rightarrow \infty} \left( F_{X_{[n]}}(\beta + \epsilon) -  F_{X_{[n]}}(\beta - \epsilon) \right) \\
+    =&\lim_{n\rightarrow \infty} \left( 1 -  \left(\frac{x}{\beta}\right)^{n\alpha} \right) \\
+    =& 1- \lim_{n\rightarrow \infty}\left(\frac{x}{\beta}\right)^{n\alpha} \\
+    =& 1 - 0 \mbox{ , pues $0<x<\beta$} \\
+    =& 1
+\end{align*}
+Entonces, $X_{[n]}$ es consistente.
+
+## Solución f
+Hallemos la varianza de $X_{[n]}$.
+\begin{align*}
+    E[X_{[n]}^2] &= \int_{-\infty}^{\infty} x^2 f_{X_{[n]}}(x) dx \\
+    &= \int_{0}^{\beta} x^2 \frac{n\alpha}{\beta^{n\alpha}}x^{n\alpha-1} dx \\
+    &= \int_{0}^{\beta} \frac{n\alpha}{\beta^{n\alpha}}x^{n\alpha+1} dx \\
+    &= \frac{n\alpha}{\beta^{n\alpha}} \left[ \frac{x^{n\alpha+2}}{n\alpha+2} \right]_0^{\beta} \\
+    &= \frac{n\alpha}{\beta^{n\alpha}} \left[ \frac{\beta^{n\alpha+2}}{n\alpha+2} \right] \\
+    &= \frac{n\alpha}{n\alpha+2} \beta^2
+\end{align*}
+Entonces,
+\begin{align*}
+    var(X_{[n]}) &= E[X_{[n]}^2] - E[X_{[n]}]^2 \\
+    &= \frac{n\alpha}{n\alpha+2} \beta^2 - \left(\frac{n\alpha}{n\alpha+1} \beta \right)^2 \\
+    &= \left(\frac{n\alpha}{n\alpha+2} - \left(\frac{n\alpha}{n\alpha+1} \right)^2\right)\beta^2
+\end{align*}
+Ahora,
+\begin{align*}
+    \frac{d}{d\beta}E\left[X_{[n]}\right] &=  \frac{d}{d\beta}\left[ \frac{n\alpha}{n\alpha+1} \beta\right] \\
+    &= \frac{n\alpha}{n\alpha+1} 
+\end{align*}
+\begin{align*}
+    I(\beta) &= E\left( \left(\frac{d}{d\beta}ln(\alpha x^{\alpha-1}\beta^{-\alpha})\right)^2\right) \\
+    &=  E\left(\left( \frac{-\alpha}{\beta} \right)^2\right) \\
+    &= \left( \frac{\alpha}{\beta} \right)^2
+\end{align*}
+Finalmente,
+\begin{align*}
+    var(X_{[n]}) &\geq  \frac{\left( \frac{d}{d\beta}E\left[X_{[n]}\right] \right)^2}{n  I(\beta)}\\
+    \left(\frac{n\alpha}{n\alpha+2} - \left(\frac{n\alpha}{n\alpha+1} \right)^2\right)\beta^2 &\geq \frac{\left(\frac{n\alpha}{n\alpha+1} \right)^2}{n  \left( \frac{\alpha}{\beta} \right)^2}
+\end{align*}
+Sean $n=1, \alpha = 2, \beta = 1$
+\begin{align*}
+    \left(\frac{4}{6} - \left(\frac{4}{5} \right)^2\right) &\geq \frac{\left(\frac{4}{5} \right)^2}{  \left( \frac{2}{1} \right)^2} \\
+    \left(\frac{2}{75}\right) &\geq \frac{2}{25}\\
+    25 &\geq 75
+\end{align*}
+Lo cual es imposible. Por tanto, la desigualdad de Rao-Cramer para $\beta$ no se cumple

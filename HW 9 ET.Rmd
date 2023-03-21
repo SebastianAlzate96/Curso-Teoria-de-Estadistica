@@ -1,0 +1,196 @@
+---
+title: "HW 9"
+author: "Sebastian Alzate Vargas"
+date: "03/30/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Digamos que tenemos una sola observación x de un rv X con distribución $Pois (\lambda+ b)$, donde se conoce $b$. Aplique cada uno de los siguientes métodos para encontrar intervalos de $95\%$ cuando $x = 23$ y $b = 5.6$.
+
+a. Encontrar un $( 1 - \alpha ) 100 \%$ intervalo de confianza para $\lambda$ invirtiendo el $LRT$ de muestra grande.
+
+b. Encontrar un $( 1 - \alpha ) 100 \%$ intervalo de confianza para $\lambda$ invirtiendo el $LRT$ sin utilizar la teoría de la muestra grande.
+
+c. Encontrar un $( 1 - \alpha ) 100 \%$ intervalo creíble para $\lambda$ utilizando el anterior $\pi( \lambda ) = 1$.
+
+## Solution a
+ 
+Tenemos una observación, entonces la función likelihood esta dada por: 
+
+\begin{align*}
+    f(x|\lambda) = \dfrac{e^{-(\lambda+b)}(\lambda+b)^x}{x!}
+\end{align*}
+
+Luego, $l(\lambda)$ esta dado por:
+
+\begin{align*}
+   l(\lambda) = -(\lambda+b) + x\log(\lambda+b) - \log(x!)
+\end{align*}
+Derivando la funcion $l(\lambda)$ con respecto a 
+$\lambda$ e igualando a cero, obtenemos
+\begin{align*}
+ \dfrac{ dl(\lambda)}{d\lambda} = -1 + \frac{x}{\lambda + b}=\frac{x-b-\lambda}{\lambda+b}=0
+\end{align*}
+Así, el mle esta dado por: $$\hat\lambda=x-b$$
+
+Por otro lado queremos probar $H_0: \lambda=\lambda_0$ vs $H_a: \lambda \neq \lambda_0$. 
+
+Luego, $-2 \log \pmb{\lambda(x)}$ esta dado por
+
+\begin{align*}
+   -2 \log \pmb{\lambda(x)}&= 2\left[ l( \hat \lambda) - l(\lambda_0 )\right]\\ &=  2[ -(x-b+b) + x\log(x-b+b) - \log(x!) \\ & \ \ \ \ + \lambda_0 + b - x\log(\lambda_0+b) + \log(x!)] \\
+    &= 2[x\log(x) - x\log(\lambda_0+b) - x + \lambda_0 + b]\\
+    &=-2[ x\log(\lambda_0+b)-x\log(x) + x - \lambda_0 - b]
+\end{align*}
+
+Rechazamos $H_0$ si 
+\begin{align*}
+    -2[ x\log(\lambda_0+b)-x\log(x) + x - \lambda_0 - b] &> qchisq(1-\alpha,1)\\
+     x\log(\lambda_0+b)-x\log(x) + x - \lambda_0 - b &<-qchisq(1-\alpha,1)/2
+\end{align*}
+
+La región de aceptación esta dada por:
+
+$$A(\lambda)=\left\{ x: x\log(\lambda_0+b)-x\log(x) + x - \lambda_0 - b \geq cv\right\}$$
+
+donde $cv=-qchisq(1-\alpha,1)/2$
+```{r}
+x<-23
+b<-5.6
+LRT<- function(l) {
+  (x*log(l+b)-x*log(x)+x-l-b)
+}
+cv<-(-1)*qchisq((1-0.05), 1)/2
+plot(LRT,xlim = c(8,30),ylim=c(-3,0));abline(h=cv, col=4)
+```
+De la region de aceptacion podemos observar que:
+
+\begin{align*}
+   x\log(\lambda_0+b)-x\log(x) + x - \lambda_0 - b &\geq cv \\
+    x\log(\lambda_0+b)- \lambda_0   &\geq cv + x\log(x) - x + b
+\end{align*}
+ 
+podemos resolver esta inecuacion para $\lambda_0$ numericamente.
+```{r}
+Interval<-function(x,b,alpha=0.05){
+ mle<-x-b
+ cv<-(-1)*qchisq(1-alpha, 1)/2
+ linf<-0
+  for (i in 1:1000) {
+    linf<-linf+0.01
+    k<-x*log(linf+b)-linf
+    if(k>=cv+x*log(x)-x+b)break
+    linf
+  }
+  lsup<-mle
+  for (i in 1:10000) {
+    lsup<-lsup+0.01
+    k<-x*log(lsup+b)-lsup
+    if(k<=cv+x*log(x)-x+b)break  
+    lsup
+  }
+  cat("Elintervalo es:", linf,lsup)
+  LRT<- function(l) {
+  (x*log(l+b)-x*log(x)+x-l-b)
+  }
+  plot(LRT,xlim = c(linf-3,3+lsup),ylim=c(-3,0))
+  abline(h=cv, col=4);abline(v=linf, col=2);abline(v=lsup,col=2)
+}
+Interval(23,5.6)
+```
+
+ 
+## Solution b
+
+Queremos testear $H_0: \lambda=\lambda_0$ vs $H_a:  \lambda \neq \lambda_0$
+
+Rechazamos $H_0$ si el LRT es small o lo que es equivalente a decir que $-2\log \pmb{\lambda(x)}$ es large.
+
+Definamos 
+
+$$h(x)=2\left[x\log x -x\log(\lambda_0+b) -x+\lambda_0+b \right]$$
+
+Derivando con respecto a $x$ obtenemos:
+
+\begin{align*}
+    \dfrac{dh(x)}{dx}=2\log x +2 - 2 \log(\lambda_0+b)-2=2\log \left(\frac{x}{\lambda_0+b} \right)>0
+\end{align*}
+
+Cuando $x>\lambda_0+b$.
+
+Entonces $h(x)$ es decreciente en $(-\infty, \lambda_0+b)$ y creciente en $(\lambda_0+b,\infty)$.
+
+Por tanto, $h(x)$ es large cuando $x<cv1$ y $x>cv2$
+
+Podemos verificarlo con una grafica
+
+```{r}
+hx<- function(x, l=23, b=5.6) {
+  2*(x*log(x)-x-x*log(l+b)+l+b)
+}
+plot(hx,xlim = c(0,70))
+```
+
+Entonces rechazamos $H_0$ cuando $x<cv1$ y $x>cv2$. Así,
+
+\begin{align*}
+    \dfrac{\alpha}{2}&=P(X\leq cv1)=ppois(cv1,\lambda+b)\\
+    \dfrac{\alpha}{2}&=P(X>cv2)=1-ppois(cv2,\lambda+b)
+\end{align*}
+
+```{r}
+inter<-function(x,b,alpha=0.05){
+  lminf<-0
+  for (i in 1:1000) {
+    lminf<-lminf+0.01
+    k<-1-ppois(x,lminf+b)
+    if (k>=alpha/2)break
+  }
+  lmsup<-0
+  for (j in 1:3000) {
+    lmsup<-lmsup+0.01
+    k<-1-ppois(x,lmsup+b)
+    if (k>=1-alpha/2)break
+  }
+cat("El intervalo es:", lminf,lmsup)
+}
+inter(23,5.6)
+```
+## Solution c
+
+La función posterior esta dada por 
+ $$\pi(\lambda\vert x)=\dfrac{f(x;\lambda)}{m(x)}$$
+La función de distribución conjunta esta dada por:
+
+\begin{align*}
+    f(x;\lambda) = \dfrac{e^{-(\lambda+b)}(\lambda+b)^x}{x!}
+\end{align*}
+
+Entonces la función marginal es:
+
+\begin{align*}
+    m(x) &= \int_0^{\infty} \dfrac{e^{-(\lambda+b)}(\lambda+b)^x}{x!} d\lambda \\
+    &= \int_0^{\infty} \frac{1}{x!} \sum_{k=0}^{x}\left[\binom{x}{k}\lambda^k b^{x-k}\right]e^{-(\lambda+b)} d\lambda \\
+    &= \sum_{k=0}^{x}b^{x-k}e^{-b} \frac{1}{(x-k)!k!} \int_0^{\infty}\lambda^k e^{-\lambda} d\lambda \\
+    &= \sum_{k=0}^{x}b^{x-k}e^{-b} \frac{1}{(x-k)!} \int_0^{\infty}\frac{1}{\Gamma(k+1)}\lambda^{(k+1)-1} e^{-\lambda} d\lambda \\
+    &= \sum_{k=0}^{x} \frac{b^{x-k}e^{-b}}{(x-k)!} \\
+    &= e^{-b}\sum_{k=0}^{x} \frac{b^{x-k}}{(x-k)!} \\
+    &= e^{-b}\sum_{i=0}^{x} \frac{b^{i}}{i!} \\
+    &= e^{-b} e^b \mbox{ , cuando $x$ es grande.} \\
+    &= 1
+\end{align*}
+
+Entonces, la posterior
+
+$$\pi(\lambda|x)=\dfrac{e^{-(\lambda+b)}(\lambda+b)^x}{x!}$$
+
+es igual a la likelihood, y por tanto the Bayesian credible interval es el mismo que en la parte b.
+
+Usando la función anterior obtenemos que
+
+```{r}
+inter(23,5.6)
+```
+

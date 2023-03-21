@@ -1,0 +1,297 @@
+---
+title: "Midterm"
+author: "Sebastian Alzate Vargas"
+date: "03/20/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+x <- c(1, 1.02, 1.03, 1.03, 1.03, 1.03, 1.03, 1.04, 1.05,
+       1.05, 1.05, 1.06, 1.06, 1.07, 1.07, 1.08, 1.09, 1.09,
+       1.09, 1.1, 1.11, 1.11, 1.12, 1.13, 1.13, 1.14, 1.15,
+       1.15, 1.16, 1.16, 1.16, 1.17, 1.2, 1.2, 1.21, 1.21,
+       1.22, 1.23, 1.23, 1.23, 1.24, 1.24, 1.24, 1.24, 1.24,
+       1.25, 1.25, 1.26, 1.28, 1.34, 1.35, 1.41, 1.43, 1.43,
+       1.43, 1.44, 1.44, 1.44, 1.44, 1.44, 1.45, 1.45, 1.46,
+       1.47, 1.48, 1.48, 1.51, 1.51, 1.53, 1.55, 1.56, 1.58,
+       1.58, 1.61, 1.65, 1.66, 1.69, 1.71, 1.73, 1.75, 1.77,
+       1.78, 1.8, 1.84, 1.87, 1.88, 1.93, 1.97, 2.02, 2.12,
+       2.26, 2.3, 2.52, 2.62, 2.7, 2.73, 3.1, 3.74, 3.82, 4.29)
+```
+
+# Solución a
+Verifiquemos la función de densidad:
+
+\begin{align*}
+    \int_1^{\infty}\frac{a}{x^{a+1}}dx=-x^{-a}\vert_1^{\infty}=0-(-1)=1
+\end{align*}
+
+$\underline{\text{Método de momentos:}}$
+\begin{align*}
+    E(X)=\int_1^{\infty}x\cdot\frac{a}{x^{a+1}}dx&=a\int_1^{\infty}x^{-a}dx\\
+    &=a\left[\dfrac{x^{-a+1}}{1-a}\right]_1^{\infty}\\
+    &=a\left[0-\dfrac{1}{1-a}\right]\\
+    &=\dfrac{a}{a-1}=\overline{x}
+\end{align*}
+De lo anterior tenemos:
+\begin{align*}
+    a&=\overline{x}(a-1)\\
+    a&=a\overline{x}-\overline{x}\\
+    -\overline{x}&=a(1-\overline{x})
+\end{align*}
+Asi, el estimador de $a$ es $$\hat{a}=\dfrac{\overline{x}}{\overline{x}-1}$$
+
+Reemplazando nuestro datos
+
+```{r}
+n<-length(x)
+a_esti<-(sum(x)/n)/(sum(x)/n-1)
+a_esti
+```
+
+
+$\underline{\text{Método máximo likelihood:}}$
+
+La función likelihood esta dada por:
+
+\begin{align*}
+    f(a\vert x)=\displaystyle\prod_{i=1}^n\dfrac{a}{x_i^{a+1}}=a^n\displaystyle\prod_{i=1}^nx_i^{-(a+1)}
+\end{align*}
+
+ahora podemos encontrar $\log f(a\vert x)$
+
+\begin{align*}
+   l(a)&=n\log a-(a+1)\sum_{i=1}^n\log x_i
+\end{align*}
+
+Derivando $l(a)$ con respecto $a$ e igualando a cero, tenemos
+
+\begin{align*}
+    \dfrac{d l(a)}{da}=\dfrac{n}{a}-\sum_{i=1}^n\log x_i=0
+\end{align*}
+
+así, el estimado de $a$ es:
+
+\begin{align*}
+    \hat{a}=\dfrac{n}{\sum\log x_i}
+\end{align*}
+
+Reemplazanndo los datos
+
+```{r}
+ahat<-n/sum(log(x))
+ahat
+```
+
+
+# Solución b
+Hallemos la función de distribución
+
+\begin{align*}
+    F_X(x)=\int_1^x at^{-a-1}dt=-t^{-a}\vert_1^x=1-x^{-a}
+\end{align*}
+
+Definamos $Y=\log X$, entonces
+
+\begin{align*}
+    P(Y\leq y)=P(\log X \leq y)=P\left(X\leq e^{y}\right)=1-e^{-ya}
+\end{align*}
+
+Así, $Y_i\sim\text{Exp}(a)$ entonces $\sum Y_i\sim\Gamma(n,a)$. Definamos $W=\sum Y_i$, entonces
+
+\begin{align*}
+  E\left( \frac{n}{\sum \log X_i} \right) = E\left( \frac{n}{\sum Y_i} \right)=E\left(\frac{n}{W}\right)
+\end{align*}
+
+y
+
+\begin{align*}
+   E\left(\frac{n}{W}\right)= \int_{0}^{\infty} \frac{n}{w} \cdot \frac{a^n}{\Gamma(n)} w^{n-1} e^{-a w} dw
+  &= \frac{na}{n-1} \int_{0}^{\infty} \frac{a^{n-1}}{\Gamma(n-1)} w^{(n-1)-1} e^{-a w} dw \\
+    &= \frac{na}{n-1}\cdot 1\\
+    &=\frac{na}{n-1}
+\end{align*}
+
+Así, $\text{Bias}(\hat{a})=E(\hat{a})-a=\dfrac{na}{n-1}-a=\dfrac{a}{n-1}$
+
+
+# Solución c
+Por la ley de los grandes números tenemos que $\overline{Y}$ tiende a $E(Y_i)=1/a$ para algún $Y_i$.
+
+Es decir,  $\lim_{n\rightarrow{\infty}}P\left(\left|\overline{Y} -\frac{1}{a} \right| >\varepsilon'\right)=0$
+
+Ahora
+
+\begin{align*}
+    \lim_{n\rightarrow{\infty}}P\left(\left|\frac{1}{\overline{Y}}-a\right|>\varepsilon \right) &=\lim_{n\rightarrow{\infty}}P\left(-\varepsilon>\frac{1}{\overline{Y}}-a>\varepsilon \right)\\
+    &=\lim_{n\rightarrow{\infty}}P\left(-\varepsilon+a>\frac{1}{\overline{Y}}>\varepsilon+a \right)\\
+    &=\lim_{n\rightarrow{\infty}}P\left(\frac{1}{a-\varepsilon}<\overline{Y}<\frac{1}{a+\varepsilon} \right)\\
+    &=\lim_{n\rightarrow{\infty}}P\left(\frac{1}{a-\varepsilon}-\frac{1}{a}<\overline{Y}-\frac{1}{a}<\frac{1}{a+\varepsilon}-\frac{1}{a} \right)\\
+     &=\lim_{n\rightarrow{\infty}}P\left(\frac{\varepsilon}{a(a-\varepsilon)}<\overline{Y}-\frac{1}{a}<\frac{-\varepsilon}{a(a+\varepsilon)} \right)
+\end{align*}
+
+Notemos que $\frac{\varepsilon}{a(a+\varepsilon)}<\frac{\varepsilon}{a(a-\varepsilon)}$ (pues $a>1$). Entonces
+
+\begin{align*}
+     \lim_{n\rightarrow{\infty}}P\left(\frac{\varepsilon}{a(a+\varepsilon)}<\overline{Y}-\frac{1}{a}<\frac{-\varepsilon}{a(a+\varepsilon)} \right)
+     &=\lim_{n\rightarrow{\infty}}P\left(\left|\overline{Y} -\frac{1}{a} \right| >\frac{\varepsilon}{a(a+\varepsilon)}\right)=0
+\end{align*}
+Así, $\hat{a}$ es un estimador consistente
+
+
+# Solución d
+
+#### based on the large sample approximation of the likelihood ratio test
+.
+
+Del ejercicio a) tenemos: $$l(a)=n\log a-(a+1)\sum_{i=1}^n\log x_i$$
+
+Entonces   
+
+\begin{align*}
+    \log \lambda(x) &= \frac{l(\hat{\hat{a}})}{l(\hat a)}= \dfrac{n\log2-3\sum \log x_i}{n\log \hat a-(\hat a+1)\sum \log x_i}
+\end{align*}
+Así, 
+\begin{align*}
+    -2\log \lambda(x) &= -2\left( n\log 2-3\sum \log x_i - n\log \hat a+(\hat a+1)\sum log(x_i)\right)
+\end{align*}
+
+Llamemos $k=-2\log \lambda(x)$. Entonces 
+
+$$p=\left\{\begin{array}{ccc}P(Y<K\vert a) & \text{si} & k<qchisq(\alpha/2,1) \\
+P(Y>K\vert a) & \text{si} & k>qchisq(1-\alpha/2,1)  \end{array}\right.$$
+
+```{r}
+alpha<-0.05
+k<-(-2)*(n*log(2)-3*sum(log(x))-n*log(ahat)+(ahat+1)*sum(log(x)))
+c(k,qchisq(1-alpha/2,1),qchisq(alpha/2,1))
+```
+Como $k>qchisq(1-\alpha/2,1)$. Entonces $P\left( Y > k\right)$. Hallemos el p-value
+
+\begin{align*}
+    P\left( Y > k\right) = 1-pchisq(k,1)
+\end{align*}
+
+```{r}
+
+1-pchisq(k,1)
+```
+Entonces se rechaza $H_0$.
+
+
+# Solución d
+
+#### without using the large sample approximation of the likelihood ratio test
+.
+
+Del ejercicio anterior tenemos 
+\begin{align*}
+    -2\log \lambda(x) &= -2\left( n\log 2-3\sum \log x_i - n\log \hat a+(\hat a+1)\sum log(x_i)\right)
+\end{align*}
+
+Asi,
+
+\begin{align*}
+    -2\log \lambda(x)&= -2\left( n\log 2-3\frac{n}{\hat a} - n\log \hat a +(\hat a+1)\frac{n}{\hat a}\right) \\
+    &= -2n\log 2+6\frac{n}{\hat a} +2 n\log \hat a-2(\hat a+1)\frac{n}{\hat a}
+\end{align*}
+
+Definamos $$h(a) = -2n\log 2+6\frac{n}{a} +2 n\log a-2( a+1)\frac{n}{a}$$
+
+Entonces derivando $h$ con respecto $a$ e igualando a cero, tenemos
+
+\begin{align*}
+    \frac{dh(a)}{da} =-\frac{6n}{a^2}+\frac{2n}{a}-\frac{n}{a^2}= \frac{2na-4n}{a^2} > 0
+\end{align*}
+
+Cuando $a > 2$
+
+Así, $h(a)$ es decreciente en $(1,2)$ pues $a>1$, y $h(a)$ es creciente en $(2,\infty)$. Por tanto, $h(a)$ es grande cuando $a < cv1$ o
+cuando $a>cv2$. 
+
+Podemos apoyarnos tambien en una grafica
+
+```{r}
+f<-function(a){
+  (-2)*n*log(2)+6*n/a+2*n*log(a)-2*(a+1)*n/a
+}
+plot(f,xlim = c(0,50))
+```
+En nuestro problema, rechazamos $H_0$ si $\hat a < cv1$ o $\hat a>cv2$.
+
+\begin{align*}
+    \alpha/2 =P(\text{Rechazamos } H_0\vert H_0 \text{ Verdadera})&=P(\hat a > cv2 \vert a=2)\\
+    &= P\left(\frac{n}{\sum\log(x_i)} > cv2 \right) \\
+    &=  P\left(\frac{n}{cv2} > \sum\log(x_i)  \right) \\
+    &= P\left(\sum Y_i<\frac{n}{cv2}   \right) \\
+\end{align*}
+
+Entonces el punto criticos es:
+
+\begin{align*}
+       cv2&=\frac{n}{qgamma(\alpha/2,n,a)}
+\end{align*}
+
+\begin{align*}
+    \alpha/2 =P(\text{Rechazamos } H_0\vert H_0 \text{Verdadera}) &= P(\hat a <  cv1 \vert a=2) \\
+    &=  P\left( \frac{n}{\sum\log(x_i)}<cv1  \right) \\
+    &=  P\left(\frac{n}{cv1}< \sum\log(x_i)\right) \\
+    &= 1 - P\left( \sum Y_i \leq \frac{n}{cv1} \right) \\
+\end{align*}
+
+Entonces el punto criticos es:
+
+\begin{align*}
+       cv1&=\frac{n}{qgamma(1-\alpha/2,n,a)}
+\end{align*}
+
+Entonces, la región de rechazo es:
+
+$\left\{ \hat a< cv1\right\}$ o $\left\{\hat a>cv2\right\}$
+
+Usando RStudio.
+```{r}
+a<-2
+cv1<-n/qgamma(1-alpha/2,n,1/a)
+cv2<-n/qgamma(alpha/2,n,1/a)
+c(ahat,cv1,cv2)
+```
+Por tanto, $H_0$ se rechaza. Asi $a\neq2$
+
+
+# Solución e
+
+\begin{align*}
+    f(x_1, \cdots, x_n,a) &= \left(\prod_{i=1}^n\frac{a}{x_i^{a+1}}\right) \cdot\frac{1}{a}= a^{n-1}\prod_{i=1}^n\frac{1}{x_i^{a+1}}
+\end{align*}
+
+No es posible hacerlo analiticamente por tanto hay que proceder de forma numericamente.
+
+Hallemos la marginal
+
+```{r}
+fun1<- function(a) {
+  a^(n-1)*prod(x)^(-a-1)
+}
+mx <- integrate(fun1, 1, Inf)$value
+mx
+```
+Podemos hacer una grafica de la funcion posteriori
+
+```{r}
+fun2 <- function(a) {
+ (a^(n-1)*prod(x)^(-a-1))/mx
+}
+plot(fun2,xlim = c(2,3))
+```
+Finalmente, encontremos el bayesiano con la media de la funcion posteriori
+
+```{r}
+fun3<- function(a){
+  a*fun2(a)
+} 
+integrate(fun3, 1, Inf)$value
+```
+

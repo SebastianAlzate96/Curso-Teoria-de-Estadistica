@@ -1,0 +1,123 @@
+---
+title: "Tarea 2 TE"
+author: "Sebastian Alzate Vargas"
+date: "Feb 04/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+# Problema 1
+Sea $X \sim \chi^2(n), Y \sim \chi^2(m)$ e independientes. Sea $Z=(X/n)/(Y/m)$. Entonces $Z \sim F(n,m)$
+
+## Solución 1
+Sea $X \sim \mathcal{X}^2_{n}$, $Y \sim \mathcal{X}^2_{m}$ y consideremos a $Z=\dfrac{\frac{X}{n}}{\frac{Y}{m}}$ y $W=Y$. Definamos la aplicación $$g(x,y)=\left(\dfrac{\frac{x}{n}}{\frac{y}{m}},y \right)$$
+Hallemos su función inversa $h(z,w)$,$$z=\dfrac{m}{n}\dfrac{x}{y} \ \ \Longrightarrow \ \  x=\dfrac{n}{m}zw$$ así
+$$h(z,w)=\left(\dfrac{n}{m}zw,w \right)$$
+El jacobiano de la transformación inversa es igual a:
+\begin{equation*}
+J(z,w)=\begin{vmatrix}
+\dfrac{n}{m}w & \dfrac{n}{m}z\\ \\
+0 & 1
+\end{vmatrix}=\dfrac{n}{m}w
+\end{equation*}
+Por lo tanto, la función de densidad conjunta de $Z=\dfrac{m}{n}\dfrac{X}{Y}$ y $W=Y$ esta dada por:
+\begin{align*}
+    f_{ZW}(z,w)=|J(z,w)|\cdot f_{ZW}\left( h(z,w)\right)
+\end{align*}
+donde $f_{ZW}$ es la función de densidad conjunta de $X$ y $Y$
+\begin{align*}
+    f_{ZW}(z,w)&=\dfrac{n}{m}w\cdot \dfrac{1}{2^{\frac{n}{2}}\Gamma(\frac{n}{2})}\left(\dfrac{n}{m}zw \right)^{\frac{n}{2}-1}e^{\frac{-\frac{n}{m}zw}{2}}\cdot\dfrac{1}{2^{\frac{m}{2}}\Gamma(\frac{m}{2})}\left(w\right)^{\frac{m}{2}-1}e^{\frac{-w}{2}} \\ \\
+    f_{ZW}(z,w)&=\dfrac{\frac{n}{m}\left(\frac{n}{m} \right)^{\frac{n}{2}-1}\left(z\right)^{\frac{n}{2}-1}w\left(w\right)^{\frac{n}{2}-1}\left(w\right)^{\frac{m}{2}-1}e^{\frac{-\frac{n}{m}zw}{2}-\frac{w}{2}}}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})2^{\frac{n}{2}}2^{\frac{m}{2}}}
+\end{align*}
+podemos integrar con respecto a $w$ para obtener la función de densidad de $Z$
+\begin{align*}
+    f_Z(z)=\dfrac{\left(\frac{n}{m} \right)^{\frac{n}{2}}\left(z\right)^{\frac{n}{2}-1}}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})}\int_0^{\infty}\dfrac{w^{\frac{m+n}{2}-1}}{2^{\frac{m+n}{2}}}e^{-\frac{1}{2}w\left(\frac{n}{m}z+1 \right)}dw
+\end{align*}
+Sea $u=\frac{1}{2}w\left(\frac{n}{m}z+1 \right)$ entonces $du=\frac{1}{2}\left(\frac{n}{m}z+1 \right)dw$, pero también podemos obtener que: $w=\frac{2u}{\frac{n}{m}z+1}$ y $dw=\frac{2}{\frac{n}{m}z+1}du$. Así
+\begin{align*}
+    f_Z(z)&=\dfrac{\left(\frac{n}{m} \right)^{\frac{n}{2}}\left(z\right)^{\frac{n}{2}-1}}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})}\int_0^{\infty}\dfrac{\left(\frac{2u}{\frac{n}{m}z+1} \right)^{\frac{m+n}{2}-1}}{2^{\frac{m+n}{2}}}e^{-u}\frac{2}{\frac{n}{m}z+1}du \\ \\
+    f_Z(z)&=\dfrac{\left(\frac{n}{m} \right)^{\frac{n}{2}}\left(z\right)^{\frac{n}{2}-1}}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})}\int_0^{\infty}\dfrac{\left(2\right)^{\frac{m+n}{2}-1}\left(u\right)^{\frac{m+n}{2}-1}}{2^{\frac{m+n}{2}}\left(\frac{n}{m}z+1\right)^{\frac{m+n}{2}-1}}e^{-u}\frac{2}{\frac{n}{m}z+1}du \\ \\
+    f_Z(z)&=\dfrac{\left(\frac{n}{m} \right)^{\frac{n}{2}}\left(z\right)^{\frac{n}{2}-1}}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})}\int_0^{\infty}\dfrac{u^{\frac{m+n}{2}-1}}{\left(\frac{n}{m}z+1\right)^{\frac{m+n}{2}}}e^{-u}du \\ \\
+    f_Z(z)&=\dfrac{\left(\frac{n}{m} \right)^{\frac{n}{2}}\left(z\right)^{\frac{n}{2}-1}}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})\left(\frac{n}{m}z+1\right)^{\frac{m+n}{2}}}\int_0^{\infty}u^{\frac{m+n}{2}-1}e^{-u}du \\ \\
+    f_Z(z)&=\dfrac{\left(\frac{n}{m} \right)^{\frac{n}{2}}\left(z\right)^{\frac{n}{2}-1}\Gamma\left(\frac{m+n}{2}\right)}{\Gamma(\frac{n}{2})\Gamma(\frac{m}{2})\left(\frac{n}{m}z+1\right)^{\frac{m+n}{2}}}
+\end{align*}
+Lo cual la variable aleatoria $Z$ tiene una distribución $F$ con n y m grados de libertad
+
+# Problema 2
+Sea $X_1,...,X_n$ una distribucion geometrica de radio $p$ e independientes. Sea $M=\max\{X_1,...,X_n\}$ . Encuentre la densidad de $M$
+
+## Solución 2
+Hallemos primero la función de distribución de probabilidad, para luego derivar dicha función y obtener la funcion de distribución de probabilidad 
+\begin{align*}
+    F_M(m) &= \mathbb{P}(M\leq m) \\
+    &= \mathbb{P}(max(X_1, \cdots, X_n)\leq m) \\
+    &= \mathbb{P}(X_1\leq m, \cdots, X_n\leq m) \\
+    &= \prod_{k=1}^n \mathbb{P}(X_k\leq m) \\
+    &=  \prod_{k=1}^n F_{X_k}(m)\\
+    &= \left[F_{X_i}(m)\right]^n
+\end{align*}
+Para cualquier $i$ entre $1,...,n$. Derivando:
+\begin{align*}
+     f_M(m) &= \dfrac{d}{dX_i}\left[ F_{X_1}(m)\right]^n \\
+     f_M(m) &= n\left[ F_{X_i}(m)\right]^{n-1} \cdot \dfrac{d}{dX_i}\left[ F_{X_i}(m)\right] \\
+     f_M(m) &= n\left[ F_{X_i}(m)\right]^{n-1} \cdot  f_{X_i}(m) \\
+     f_M(m) &= n \left[ \mathbb{P}(X_i\leq m)\right]^{n-1}\cdot  f_{X_i}(m) \\
+     f_M(m) &= n \left[ \sum_{r=1}^m \mathbb{P}(X_i = m_r)\right]^{n-1}\cdot f_{X_1}(m) \\
+     f_M(m) &=  n \left[ \sum_{r=1}^m p(1-p)^{m_r-1}\right]^{n-1} \cdot p(1-p)^{m-1} \\
+     f_M(m) &= \dfrac{np^{n-1}}{(1-p)^{n-1}} \left[ \sum_{r=1}^m (1-p)^{m_r}\right]^{n-1} \cdot p(1-p)^{m-1}, \ \ \ \mathrm{serie} \ \mathrm{geométrica}\ \mathrm{finita} \\
+     f_M(m) &= \dfrac{np^{n-1}}{(1-p)^{n-1}} \left[\dfrac{1-(1-p)^{m+1}}{1-(1-p)}\right]^{n-1} \cdot p(1-p)^{m-1}
+\end{align*}
+Por tanto la función de distribución de probabilidad es $$f_M(m) = np \cdot \dfrac{\left[1-(1-p)^{m+1}\right]}{(1-p)^{n-m}}$$
+
+# Problema 3
+Muestre que si $X\sim t(n)$, entonces $X^2\sim F(1, n)$
+
+## Solución 3
+Como $X$ se distribuye $t(n)$, entonces se puede escribir de la siguiente forma:
+$$X=\dfrac{Z}{\sqrt{\frac{Y}{n}}}$$ con $Z \sim N(0,1)$ y $Y \sim \mathcal{X}^2_{n}$. Notemos que 
+\begin{align*}
+    X^2&=\dfrac{Z^2}{\frac{Y}{n}} \\
+    X^2&=\dfrac{\frac{Z^2}1}{\frac{Y}{n}}
+\end{align*}
+Como $Z \sim N(0,1)$, entonces $Z^2 \sim \mathcal{X}^2_{1}$. Entonces $X^2$ se copia como la división de dos funciones chi-cuadradas. Luego por ejercicio 1 tenemos que $X^2 \sim F_{1,n}$
+
+# Problema 4
+
+## Solución 4
+Hallemos la función likelihood
+\begin{align*}
+    L(p|x) = f(x|p) &= \prod_{i=0}^{200} f(x_i|p) \\
+    &=  \prod_{i=0}^{200} \binom{10}{x_i}p^{x_i}(1-p)^{10-x_i} \\
+    &= \left[ \prod_{i=0}^{200}\binom{10}{x_i} \right] p^{\sum_{i=0}^{200} x_i}(1-p)^{\sum_{i=0}^{200}(10-x_i)} \\ 
+    &= \left[ \prod_{i=0}^{200}\binom{10}{x_i} \right] p^{\sum_{i=0}^{200} x_i}(1-p)^{\left(10*200-\sum_{i=0}^{200}x_i\right)}
+\end{align*}
+Luego, la función log likelihood es igual a:
+\begin{align*}
+    l(p|x) = log(L(p|x)) &= log\left( \left[ \prod_{i=0}^{200}\binom{10}{x_i} \right] p^{\sum_{i=0}^{200} x_i}(1-p)^{\left(2000-\sum_{i=0}^{200}x_i\right)} \right) \\
+    &= \sum_{i=0}^{200}\binom{10}{x_i} + \left(\sum_{i=0}^{200} x_i\right)log(p) + \left( 2000-\sum_{i=0}^{200}x_i \right) log(1-p)
+\end{align*}
+```{r }
+x<-c(0:7)
+y<-c(11,38,60,47,26,10,6,2)
+z<-sum(x*y)
+z
+w<-c(rep(x,y))
+sum(choose(10,w))
+``` 
+Entonces,
+\begin{align*}
+     l(p|x) &= \sum_{i=0}^{200}\binom{10}{x_i} + \left(\sum_{i=0}^{200} x_i\right)log(p) + \left( 2000-\sum_{i=0}^7x_i \right) log(1-p) \\
+     &= 18211 + 503\cdot log(p) + (2000-503)log(1-p) \\
+     &=18211 + 503\cdot log(p) +1497\cdot log(1-p)
+\end{align*}
+```{r }
+funcion_log<- function(p) {
+  y <- 0
+  for(i in seq_along(p)) 
+    y[i] <-sum(choose(10,w))+ sum(z)*log(p[i])+ (2000-sum(z))*log(1-p[i])
+  y
+}
+curve(funcion_log,0,1, main='Grafica de la funcion log', col='red')
+``` 

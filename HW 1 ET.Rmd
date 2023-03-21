@@ -1,0 +1,198 @@
+---
+title: "Tarea 1 - Teoría de estadística"
+author: "Sebastian Alzate Vargas, 502200289"
+date: "01/28/2021"
+output:
+  pdf_document:
+      latex_engine: xelatex
+  html_document: default
+---
+## Problem 1
+Let the rv X have the probability mass function f(x;λ) = c(λ+x), x=1,2,..,N, where N is known, c is a constant and λ is an unknown parameter.
+
+a. find c
+b. find E[X]
+
+### Solución
+a. Como f(x;$\lambda$) es la función masica de probabilidad, tenemos que $\sum_{x=1}^
+{\infty}f(x;\lambda)=1$. Así
+\begin{align*}
+    \sum_{x=1}^N c(\lambda+x)&=1 \\
+    c(\lambda+1)+c(\lambda+2)+\cdots+c(\lambda+N)&=1 \\
+    c\left[\lambda N + (1+\cdots+N)\right]&=1 \\
+    c\left[\lambda N + \dfrac{N(N+1)}{2}\right]&=1 \\
+    c\left[\dfrac{2\lambda N+N(N+1)}{2}\right]&=1 \\
+    c\left[\dfrac{N^2+N(2\lambda +1)}{2}\right]&=1 \\
+\end{align*}
+despejando $c$ tenemos:
+$$c=\left[\dfrac{2}{N^2+N(2\lambda +1)}\right]$$
+
+Así la función masica de probabilidad es:
+f(x;$\lambda$)=$\frac{2(\lambda+x)}{N^2+N(2\lambda +1)}$
+
+b. Ahora encontremos el esperado de X
+\begin{align*}
+    \mathbb{E}\left(X\right)&=\sum_{x=1}^
+{\infty}x\cdot f(x;\lambda) \\
+&= \sum_{x=1}^{N}x\frac{2(\lambda+x)}{N^2+N(\lambda +1)}\\
+&= \dfrac{2}{N^2+N(2\lambda +1)}\sum_{x=1}^{N}(\lambda x+x^2)\\
+&= \dfrac{2}{N^2+N(2\lambda +1)}\left[\sum_{x=1}^{N}\lambda x+\sum_{x=1}^{N}x^2\right]\\
+&= \dfrac{2}{N^2+N(2\lambda+1)}\left[\dfrac{N(N+1)\lambda}{2}+\dfrac{N(N+1)(2N+1)}{6}\right]\\
+&= \dfrac{2}{N(N+2\lambda+1)}\left[\dfrac{N(N+1)(2N+3\lambda+1)}{6}\right]\\
+&=\dfrac{(N+1)(2N+3\lambda+1)}{3(N+2\lambda+1)}
+\end{align*}
+
+## Problem 2
+Let the rv (X,Y) be the uniform distribution , on the area 0<x<y^2<1, 0<y<1
+
+a. find cor(X,Y)
+b. find E[X|Y=y]
+
+### Solución
+a. El área a trabajar esta limitada por las tres lineas que se presentan a continuación:
+
+```{r echo=FALSE}
+y<-function(x){sqrt(x)}
+plot(y, xlim=c(0,1),ylim=c(0,1), col="red",main="Gráfica")
+abline(v=0,lty = 2, col = "darkgreen", lwd = 2)
+abline(h=1,lty = 2, col = "blue", lwd = 2)
+```
+
+entonces los limites son: $0<x<y^2$ y $0<y<1$
+
+Primero hallemos la función de densidad para esa distribución uniforme
+\begin{align*}
+    \int_{-\infty}^\infty\int_{-\infty}^\infty f(x,y)dxdy&=1\\
+    \int_0^1\int_0^{y^2} k dxdy&=1\\
+    k \int_0^1 y^2 dy&=1\\
+    k \int_0^1 y^2 dy&=1\\
+    \dfrac{k}{3}&=1 \\
+    k&=3
+\end{align*}
+Con esa función de distribución conjunta podemos hallar las marginales.
+\begin{align*}
+    f_X(x)= \int_{-\infty}^\infty f(x,y)dy&= \int_{\sqrt{x}}^1 3 dy =3(1-\sqrt{x}) \\
+    f_Y(y)= \int_{-\infty}^\infty f(x,y)dx&= \int_{0}^{y^2} 3 dy =3y^2
+\end{align*}
+
+
+
+Sabemos que la correlación se define de la siguiente manera 
+$$cor(X,Y)=\dfrac
+{cov(X,Y)}{sd(X)sd(Y)}=\dfrac
+{\mathbb{E}(XY)-\mathbb{E}(X)\mathbb{E}(Y)}{sd(X)sd(Y)}$$
+Entonces hallemos cada uno de esos terminos
+
+\begin{align*}
+    \mathbb{E}(X)=\int_{-\infty}^\infty x f_X(x)dx&= \int_0^13x(1-\sqrt{x})dx \\
+    &=3\left( \dfrac{x^2}{2}- \dfrac{2}{5} x^{\frac{5}{2}}\right)_0^1\\
+    &=3\left( \dfrac{1}{2}- \dfrac{2}{5} \right)\\
+    &=\dfrac{3}{10}
+    \end{align*}
+\begin{align*}
+    \mathbb{E}(Y)=\int_{-\infty}^\infty y f_Y(y)dy&= \int_0^13y^2dy \\
+    &= \dfrac{3}{4}y^4|_0^1 \\
+    &=\dfrac{3}{4}
+\end{align*}
+\begin{align*}
+    \mathbb{E}(XY)=\int_{-\infty}^\infty\int_{-\infty}^\infty xyf(x,y)dxdy&= \int_0^1\int_0^{y^2} 3xy dxdy\\
+    &= \int_0^1 \dfrac{3}{2}yx^2|_0^{y^2}dy\\
+    &= \int_0^1 \dfrac{3}{2}y^5dy \\
+    &= \dfrac{3}{2}\cdot\dfrac{1}{2}=\dfrac{1}{4}
+\end{align*}
+entonces $$cov(X,Y)=\mathbb{E}(XY)-\mathbb{E}(X)\mathbb{E}(Y)=\dfrac{1}{4}-\dfrac{3}{10}\cdot\dfrac{3}{4}=\dfrac{1}{40}$$
+ ahora hallemos la varianza de X y Y, la cual se define así:
+
+$$Var(X)=\mathbb{E}(X^2)-\left[\mathbb{E}(X)\right]^2$$
+\begin{align*}
+    \mathbb{E}(X^2)=\int_{-\infty}^\infty x^2 f_X(x)dx&= \int_0^13x^2(1-\sqrt{x})dx \\
+    &=3\left( \dfrac{x^3}{3}- \dfrac{2}{7} x^{\frac{7}{2}}\right)_0^1\\
+    &=3\left( \dfrac{1}{3}- \dfrac{2}{7} \right)\\
+    &=\dfrac{1}{7}
+\end{align*}
+\begin{align*}
+    \mathbb{E}(Y^2)=\int_{-\infty}^\infty y^2 f_Y(y)dy&= \int_0^13y^4dy \\
+    &= \dfrac{3}{5}y^5|_0^1 \\
+    &=\dfrac{3}{5}
+\end{align*}
+Así,
+\begin{align*}
+   sd(X)&=\sqrt{ Var(X)}=\sqrt{\dfrac{1}{7}-\dfrac{9}{100}}=\sqrt{\dfrac{37}{700}}\\ \\ 
+   sd(Y)&=\sqrt{ Var(Y)}=\sqrt{\dfrac{3}{5}-\dfrac{9}{16}}=\sqrt{\dfrac{3}{80}}
+\end{align*}
+Por tanto,
+\begin{align*}
+    cor(X,Y)=\dfrac{cov(X,Y)}{sd(X)sd(Y)}&=\dfrac{\mathbb{E}(XY)-\mathbb{E}(X)\mathbb{E}(Y)}{sd(X)sd(Y)} \\
+    &=\dfrac{\dfrac{1}{40}}{\sqrt{\dfrac{37}{700}}\sqrt{\dfrac{3}{80}}} \\
+    &= 0,562
+\end{align*}
+
+b. $$f_{X|Y=y}(x|y)=\dfrac{f(x,y)}{f_Y(y)}=\dfrac{3}{3y^2}=\dfrac{1}{y^2}$$
+
+Hallemos la esperanza condicional
+
+$$\mathbb{E}(X|Y=y)=\int_{-\infty}^{\infty}xf_{X|Y=y}(x|y)dx=\int_0^{y^2}\dfrac{x}{y^2}dx=\dfrac{1}{y^2}\cdot\dfrac{x^2}{2}|_0^{y^2}=\dfrac{y^2}{2}$$
+
+## Problem 3
+Say we have discrete random variables $X_1,..,X_{50}$, independent, with $P(X_i=x)=c(1+(x−2)^2)$, $x=0,1,2,3,4$. Find (an approximate value of)
+
+$P(X_1,..,X_{50}>110)$
+
+### Solución
+Para cada variable $X_i$ tenemos que $\sum_{x=0}^{\infty}\mathbb{P}(X_i=x)=1$, entonces
+$$1=\sum_{x=0}^{4} c(1+(x-2)^2)= c(5+2+1+2+5) = 15c$$
+$$c=\dfrac{1}{15}$$
+Como las variables son iid podemos utilizar el teorema de limite central, pero primero miremos que la $Var(x)<\infty$
+\begin{align*}
+    \mathbb{E}[X_i]=\sum_{x=0}^{\infty}x\mathbb{P}(X_i=x) &= \frac{1}{15}\sum_{x=0}^{4}x(1+(x-2)^2) \\
+    &= \frac{1}{15}\sum_{x=0}^{4}(x^3-4x^2+5x)\\
+    &=\frac{1}{15}\times 30 = 2
+\end{align*}
+\begin{align*}
+    \mathbb{E}[X_i^2] = \sum_{x=0}^{\infty}x^2\mathbb{P}(X_i=x)&=  \sum_{x=0}^{4}x^2\frac{1}{15}(1+(x-2)^2)\\&=\frac{1}{15}\sum_{x=0}^{4}(x^4-4x^3+5x^2) \\&= \frac{1}{15}\times104 = \frac{104}{15}
+\end{align*}
+Por tanto, $Var(X_i) = \mathbb{E}[X_i^2]-(\mathbb{E}[X_i])^2=\frac{104}{15}-2^2=\frac{44}{15} < \infty$
+
+entonces 
+$\frac{\overline{X}-\mathbb{E}[X_i]}{\frac{sd(X_i)}{\sqrt{n}}}$ para cualquier i, se distribuye normal estandar, ahora podemos pasar a calcular la siguiente probabilidad con el teorema de limite central
+\begin{align*}
+\mathbb{P}\left(X_1+\cdots + X_{50} \leq 110\right) &= \mathbb{P}\left(50\cdot\overline{X} \leq 110\right)  \\
+    &=\mathbb{P}\left(\overline{X} \leq \frac{11}{5}\right) \\ &= \mathbb{P}\left(\frac{\overline{X}-\mathbb{E}[X_i]}{\frac{sd(X_i)}{\sqrt{n}}}\leq \frac{\frac{11}{5}-\mathbb{E}[X_i]}{\frac{sd(X_i)}{\sqrt{n}}}\right) \\
+    &= \mathbb{P}\left(\frac{\overline{X}-2}{\frac{\sqrt{\frac{44}{15}}}{\sqrt{50}}} \leq \frac{\frac{11}{5}-2}{\frac{\sqrt{\frac{44}{15}}}{\sqrt{50}}}\right) \\
+    &= \mathbb{P}\left(Z\leq \frac{5}{6}\right) \\
+    &= \Phi(0.83) \\
+    &= 0.7967
+\end{align*}
+Asi, $$\mathbb{P}\left(X_1+\cdots + X_{50} > 110\right) = 1 - \mathbb{P}\left(X_1+\cdots + X_{50}\leq 110\right)$$ $$= 1-0.7967 = 0.2033$$
+
+
+
+
+## Problem 4
+Let X∼Exp(1) and Y∼Exp(2), independent. Find P(X+Y<1).
+
+### Solución
+
+Como $X \sim \mathrm{Exp}(1)$ entonces $f_X(x)=e^{-x}$ y 
+$Y \sim \mathrm{Exp}(2)$ entonces $f_Y(x)=2e^{-2y}$, 
+
+Como las variables son independientes tenemos $$f(x,y)=f(x)f(y)=2e^{-2y}e^{-x}$$ para $x,y>0$, así podemos calcular la probabilidad de la siguiente forma
+
+
+\begin{align*}
+    F_{X+Y<x+y}&=\mathbb{P}(X+Y<x+y) \\
+    &= \int \int_{\mathbb{R}} f(x,y) dxdy \\
+    &= \int\int_{x+y<1}2e^{-2y}e^{-x} dx dy
+\end{align*}    
+tenemos que $0<x<1-y$ entonces $y<1$
+\begin{align*}  
+    &= \int_0^{1}\int_0^{1-y}2e^{-2y}e^{-x} dx dy \\
+    &=  -2\int_0^{\infty} e^{-2y}e^{-x} |_0^{1-y}dy \\
+    &=  -2\int_0^{\infty} e^{-2y}[e^{y-1}-1 ]dy\\
+    &= -2\int_0^{\infty} e^{-y-1}-e^{-2y}dy \\
+    &= -2\left[-e^{-y-1}+\dfrac{1}{2}e^{-2y}\right]_0^1 \\
+    &= \left[ 2e^{-y-1}-e^{-2y}\right]_0^1 \\
+    &= 2e^{-2}-e^{-2}-2e^{-1}+1\\
+    &= e^{-2}-2e^{-1}+1 \\
+    &\approx 0,399
+\end{align*}
